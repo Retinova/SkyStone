@@ -6,11 +6,13 @@ public class Odometry {
 
     private int deltaX;
     private int deltaY;
-    private int dPI;
+    private int dPI = 1000;
 
     private double rawAngle;
     private double expectedAngle;
     private double normalizedAngle;
+
+    private PIDController pid = new PIDController(0, 0, 0);
 
     public Odometry(){}
 
@@ -43,6 +45,7 @@ public class Odometry {
             if(rawAngle >= 0){
                 // use 0 - 360 until 190, then switch to -180 - 180(normalized angle then switch to non-normalized)
                 normalizedAngle = normLeft(target);
+                // TODO: opModeIsActive
                 while(normalizedAngle < 190){
                     // TODO: pid
 
@@ -83,6 +86,7 @@ public class Odometry {
             if(rawAngle <= 0){
                 // use 0 - -360 until -190, then switch to -180 - 180(normalized angle then switch to non-normalized)
                 normalizedAngle = normRight(target);
+                // TODO: opModeIsActive
                 while(normalizedAngle > -190){
                     // TODO: pid
 
@@ -125,8 +129,11 @@ public class Odometry {
     }
 
     public double getRawAngle() {
+        // TODO: get actual reading
         return rawAngle;
     }
 
-
+    public double getError(double target, double actual){
+        return actual - target;
+    }
 }
