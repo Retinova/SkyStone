@@ -49,7 +49,6 @@ public class Odometry {
                 pid.start();
                 // TODO: opModeIsActive
                 while(true){
-                    // TODO: pid
 
                     pid.getOutput(normalizedAngle);
 
@@ -61,7 +60,6 @@ public class Odometry {
             }
             else{
                 // rawAngle < 0, use -180 - 180 straight away(use non-normalized angle) until 10, then switch to 0-360
-                // TODO: pid
                 normalizedAngle = getRawAngle();
 
                 pid.start();
@@ -82,7 +80,6 @@ public class Odometry {
                 // normalize for 0 - 360
                 normalizedAngle = normLeft(getRawAngle());
                 // use pid on normalized angle
-                // TODO: pid
                 pid.start();
 
                 while(true){
