@@ -2,34 +2,39 @@ package org.firstinspires.ftc.teamcode.odometryinput;
 
 public class Odometry2 {
 
-    private final int dPI = 1000;
+//    private final int dPI = 1000;
 
     private double rawAngle;
     private double error;
 
-    PIDController pid = new PIDController(0, 0, 0);
+    PIDController turnPid = new PIDController(0, 0, 0);
+
+    private double currentX = 0;
+    private double currentY = 0;
+
+    PIDController posPid = new PIDController(0, 0, 0);
 
 
     public void turnTo(double angle){
 
         // use 0 - 360
         if(angle >= 180){
-            pid.start();
+            turnPid.start();
             error = getError(angle, normLeft(getCurrentAngle()));
 
             while(true){
-                pid.getOutput(error);
+                turnPid.getOutput(error);
 
                 error = getError(angle, normLeft(getCurrentAngle()));
             }
         }
         // use 0 - -360
         else if(angle <= -180){
-            pid.start();
+            turnPid.start();
             error = getError(angle, normRight(getCurrentAngle()));
 
             while(true){
-                pid.getOutput(error);
+                turnPid.getOutput(error);
 
                 error = getError(angle, normRight(getCurrentAngle()));
             }
@@ -37,11 +42,11 @@ public class Odometry2 {
         }
         // use 180 - -180
         else{
-            pid.start();
+            turnPid.start();
             error = getError(angle, getCurrentAngle());
 
             while(true){
-                pid.getOutput(error);
+                turnPid.getOutput(error);
 
                 error = getError(angle, getCurrentAngle());
             }
@@ -65,4 +70,15 @@ public class Odometry2 {
     public double getError(double target, double actual){
         return actual - target;
     }
+
+    /*public void update(){
+        double sum = motor1.getCurrentPosition() + motor2.getCurrentPosition() + motor3.getCurrentPosition() + motor4.getCurrentPosition();
+        double avgDeltaPos = sum / 4.0;
+        double currentAng = getCurrentAngle();
+        double deltaX = avgDeltaPos * Math.cos(Math.toRadians(currentAng + 90));
+        double deltaY = avgDeltaPos * Math.sin(Math.toRadians(currentAng + 90));
+
+        currentX += deltaX;
+        currentY += deltaY;
+    }*/
 }

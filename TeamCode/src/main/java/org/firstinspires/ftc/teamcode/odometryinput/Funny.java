@@ -1,26 +1,28 @@
 package org.firstinspires.ftc.teamcode.odometryinput;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
 import org.firstinspires.ftc.robotcore.external.android.AndroidOrientation;
 import org.firstinspires.ftc.robotcore.external.android.AndroidTextToSpeech;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+@Disabled
 @TeleOp(name="just a totally normal opmode nothing to see here folks", group="opmode")
 public class Funny extends LinearOpMode {
     AndroidTextToSpeech tts = new AndroidTextToSpeech();
     boolean lasta, lastb, lastx, lasty = false;
     AndroidOrientation gyro = new AndroidOrientation();
-    double[] notes = new double[]{1.125, 1.125, 2.125};
-    int index = 0;
+    //double[] notes = new double[]{1.125, 1.125, 2.125};
+    //int index = 0;
+
 
 
     @Override
     public void runOpMode() throws InterruptedException {
         tts.initialize();
 
-        tts.setLanguageAndCountry("en", "AU");
+        tts.setLanguageAndCountry("en", "US");
 
         if(gyro.isAvailable()){
             gyro.startListening();
@@ -53,9 +55,9 @@ public class Funny extends LinearOpMode {
             lastx = gamepad1.x;
 
             if(gamepad1.y && !lasty){
-                tts.setPitch((float) notes[index]);
+                //tts.setPitch((float) notes[index]);
                 tts.speak("bruh");
-                index++;
+                //index++;
             }
 
             lasty = gamepad1.y;
@@ -68,9 +70,9 @@ public class Funny extends LinearOpMode {
 
             tts.setPitch(1);
 
-            if (index >= 2){
-                index = 0;
-            }
+//            if (index >= 2){
+//                index = 0;
+//            }
         }
 
         tts.close();
