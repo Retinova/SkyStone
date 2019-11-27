@@ -2,17 +2,11 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-
-import org.firstinspires.ftc.teamcode.supers.Auto;
-import org.firstinspires.ftc.teamcode.supers.Globals;
 import org.firstinspires.ftc.teamcode.supers.Robot;
 
 @TeleOp(name="test of robot and also code modularization", group="teleop")
 public class Test1 extends LinearOpMode {
     Robot robot;
-//    DcMotor lf, lb, rf, rb = null;
-
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -44,6 +38,8 @@ public class Test1 extends LinearOpMode {
             if (gamepad1.y) robot.tele.crServo.setPower(gamepad1.left_stick_y);
             else robot.tele.crServo.setPower(0);
 
+            telemetry.addData("Servo power: ", "%.2f", robot.tele.crServo.getPower());
+            telemetry.update();
         }
     }
 }

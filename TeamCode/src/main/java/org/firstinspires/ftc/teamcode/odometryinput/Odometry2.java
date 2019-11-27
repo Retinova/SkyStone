@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.supers.Globals;
 import org.firstinspires.ftc.teamcode.supers.Quadrant;
-import org.firstinspires.ftc.teamcode.supers.Robot;
 
 public class Odometry2 {
 

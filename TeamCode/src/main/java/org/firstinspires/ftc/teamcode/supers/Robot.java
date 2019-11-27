@@ -9,12 +9,16 @@ public class Robot {
     public Auto auto;
     public Odometry2 odo;
 
+    private boolean isInitialized = false;
+
     public Robot(LinearOpMode opMode){
         Globals.opMode = opMode;
         Globals.hwMap = opMode.hardwareMap;
     }
 
     public void init(){
+        if(!isInitialized) throw new IllegalStateException("Robot class uninitialized. Construct Robot instance in runOpMode()");
+
         tele = new TeleOp();
         auto = new Auto();
         odo = new Odometry2();
