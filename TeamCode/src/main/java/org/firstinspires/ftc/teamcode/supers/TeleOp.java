@@ -5,18 +5,18 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class Auto {
-    private final DcMotor lf, lb, rf, rb;
+public class TeleOp {
+    public final DcMotor lf, lb, rf, rb;
     public final Servo servo;
     public final CRServo crServo;
 
-    private final BNO055IMU imu;
+    public final BNO055IMU imu;
     public BNO055IMU.Parameters params = new BNO055IMU.Parameters();
 
     private boolean isInitialized = false;
 
 
-    public Auto(){
+    public TeleOp(){
         servo = Globals.hwMap.servo.get("servo");
         crServo = Globals.hwMap.crservo.get("crservo");
 
@@ -24,6 +24,7 @@ public class Auto {
         lb = Globals.hwMap.dcMotor.get("lb");
         rf = Globals.hwMap.dcMotor.get("rf");
         rb = Globals.hwMap.dcMotor.get("rb");
+
 
         imu = Globals.hwMap.get(BNO055IMU.class, "imu");
         params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -38,6 +39,6 @@ public class Auto {
         if(isInitialized) {
             return imu.getAngularOrientation().firstAngle;
         }
-        else throw new IllegalStateException("Robot/gyro not properly initialized");
+        else throw new IllegalStateException("Robot/Gyro not properly initialized");
     }
 }

@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.odometryinput;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 
+@Disabled
 @TeleOp(name="mouse test", group="mouse")
 public class MouseTest1 extends LinearOpMode {
 

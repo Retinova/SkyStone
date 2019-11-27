@@ -43,7 +43,7 @@ public class Funny extends LinearOpMode {
             lasta = gamepad1.a;
 
             if(gamepad1.b && !lastb){
-                tts.speak("it's sans under tale");
+                tts.speak("Evening Gromit");
             }
 
             lastb = gamepad1.b;
@@ -56,7 +56,7 @@ public class Funny extends LinearOpMode {
 
             if(gamepad1.y && !lasty){
                 //tts.setPitch((float) notes[index]);
-                tts.speak("bruh");
+                tts.speak("OK Boomer");
                 //index++;
             }
 
