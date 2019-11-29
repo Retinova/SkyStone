@@ -7,7 +7,6 @@ import org.firstinspires.ftc.robotcore.external.android.AndroidOrientation;
 import org.firstinspires.ftc.robotcore.external.android.AndroidTextToSpeech;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@Disabled
 @TeleOp(name="just a totally normal opmode nothing to see here folks", group="opmode")
 public class Funny extends LinearOpMode {
     AndroidTextToSpeech tts = new AndroidTextToSpeech();

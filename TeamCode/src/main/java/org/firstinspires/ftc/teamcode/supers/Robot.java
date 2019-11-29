@@ -14,6 +14,8 @@ public class Robot {
     public Robot(LinearOpMode opMode){
         Globals.opMode = opMode;
         Globals.hwMap = opMode.hardwareMap;
+
+        isInitialized = true;
     }
 
     public void init(){
@@ -27,7 +29,6 @@ public class Robot {
     }
 
     public void initGyro(){
-        tele.initGyro();
         auto.initGyro();
         odo.initGyro();
     }

@@ -10,6 +10,7 @@ public class Test1 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+
         robot = new Robot(this);
 
         robot.init();

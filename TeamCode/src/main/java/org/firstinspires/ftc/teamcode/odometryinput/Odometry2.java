@@ -10,10 +10,6 @@ import org.firstinspires.ftc.teamcode.supers.Quadrant;
 
 public class Odometry2 {
 
-
-
-//    private final int dPI = 1000;
-
     private final DcMotor lf, lb, rf, rb;
     public final Servo servo;
     public final CRServo crServo;
@@ -21,19 +17,22 @@ public class Odometry2 {
     private final BNO055IMU imu;
     public BNO055IMU.Parameters params = new BNO055IMU.Parameters();
 
-    private double error;
-    // TODO: set threshhold
+    private double angleError;
+    // TODO: set threshhold + tuning
     private double turnThreshhold;
     private PIDController turnPid = new PIDController(0, 0, 0);
 
 //    private double currentX = 0;
     private double currentY = 0;
-    // TODO: set threshhold
+    private double coordError;
+    // TODO: set threshhold + tuning
     private double coordThreshold;
     private Quadrant angleQuad;
     private PIDController posPid = new PIDController(0, 0, 0);
 
     private boolean isInitialized = false;
+
+    private final double countsPerInch = 0;
 
 
 
@@ -49,6 +48,16 @@ public class Odometry2 {
         imu = Globals.hwMap.get(BNO055IMU.class, "imu");
         params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         params.calibrationDataFile = "BNO055IMUCalibration.json";
+
+        lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        lf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void initGyro(){
@@ -57,41 +66,53 @@ public class Odometry2 {
     }
 
 
+    public void setVelocity(double forward, double clockwise){
+        // TODO: make sure directions are correct
+        double right = forward - clockwise;
+        double left = forward + clockwise;
+        double max = Math.max(Math.max(Math.abs(left), Math.abs(right)), 1.0);
+
+        lf.setPower(left / max);
+        lb.setPower(left / max);
+        rf.setPower(right / max);
+        rb.setPower(right / max);
+    }
 
     public void turnTo(double angle){
 
         // use 0 - 360
         if(angle >= 180){
             turnPid.start();
-            error = getError(angle, normLeft(getCurrentAngle()));
+            angleError = getError(angle, normLeft(getCurrentAngle()));
 
-            while(Math.abs(error) < turnThreshhold && Globals.opMode.opModeIsActive()){
-                turnPid.getOutput(error);
+            while(Math.abs(angleError) < turnThreshhold && Globals.opMode.opModeIsActive()){
+                setVelocity(0, turnPid.getOutput(angleError));
 
-                error = getError(angle, normLeft(getCurrentAngle()));
+                angleError = getError(angle, normLeft(getCurrentAngle()));
             }
         }
         // use 0 - -360
         else if(angle <= -180){
             turnPid.start();
-            error = getError(angle, normRight(getCurrentAngle()));
 
-            while(Math.abs(error) < turnThreshhold && Globals.opMode.opModeIsActive()){
-                turnPid.getOutput(error);
+            angleError = getError(angle, normRight(getCurrentAngle()));
 
-                error = getError(angle, normRight(getCurrentAngle()));
+            while(Math.abs(angleError) < turnThreshhold && Globals.opMode.opModeIsActive()){
+                setVelocity(0, turnPid.getOutput(angleError));
+
+                angleError = getError(angle, normRight(getCurrentAngle()));
             }
 
         }
         // use 180 - -180
         else{
             turnPid.start();
-            error = getError(angle, getCurrentAngle());
+            angleError = getError(angle, getCurrentAngle());
 
-            while(Math.abs(error) < turnThreshhold && Globals.opMode.opModeIsActive()){
-                turnPid.getOutput(error);
+            while(Math.abs(angleError) < turnThreshhold && Globals.opMode.opModeIsActive()){
+                setVelocity(0, turnPid.getOutput(angleError));
 
-                error = getError(angle, getCurrentAngle());
+                angleError = getError(angle, getCurrentAngle());
             }
         }
     }
@@ -118,8 +139,10 @@ public class Odometry2 {
     }
 
     public void update(){
+        // get a working average of the current encoder count
         double sum = lf.getCurrentPosition() + lb.getCurrentPosition() + rf.getCurrentPosition() + rb.getCurrentPosition();
         double avgDeltaPos = sum / 4.0;
+//        this is commented out temporarily, until actual odometry is ready (currently utilizes only forward/backward tracking)
 //        double currentAng = getCurrentAngle();
 //        double deltaX = avgDeltaPos * Math.cos(Math.toRadians(currentAng + 90));
 //        double deltaY = avgDeltaPos * Math.sin(Math.toRadians(currentAng + 90));
@@ -127,7 +150,7 @@ public class Odometry2 {
 //        currentX += deltaX;
         currentY += avgDeltaPos;
 
-        // TODO: reset encoders
+        resetEncoders();
     }
 
     public void drive(double deltaX, double deltaY){
@@ -136,9 +159,10 @@ public class Odometry2 {
         if(deltaX < 0 && deltaY < 0) angleQuad = Quadrant.III;
         if(deltaX >= 0 && deltaY < 0) angleQuad = Quadrant.IV;*/
 
-        // get the angle to turn for aligning with the hypotenuse from inverse tan, subtract 90 to shift into robot orientation
+        // get the angle to turn for aligning with the hypotenuse from inverse tan, subtract 90 to shift into proper robot orientation
         double targetAngle = Math.toDegrees(Math.atan2(deltaY, deltaX)) - 90;
 
+        // optimize the angle being passed into turnTo() (positive angle vs. negative counterpart, finds whichever is closest)
         if(targetAngle < 0){
             if(Math.abs(targetAngle - getCurrentAngle()) > Math.abs((targetAngle + 360) - getCurrentAngle())) targetAngle += 360;
         }
@@ -146,21 +170,43 @@ public class Odometry2 {
             if(Math.abs(targetAngle - getCurrentAngle()) > Math.abs((targetAngle - 360) - getCurrentAngle())) targetAngle -= 360;
         }
 
+        // align with hypotenuse
         turnTo(targetAngle);
 
-        // TODO: reset encoders
+        resetEncoders();
 
+        // get the target distance as the current "y" value plus the hypotenuse of the desired change in coordinates
         double targetDist = currentY + Math.hypot(Math.abs(deltaX), Math.abs(deltaY));
 
+        // TODO: eventually add maintaining of angle (see pushbotuatodrivebygyro)
+
         posPid.start();
-        error = getError(targetDist, currentY);
+//        turnPid.start();
 
-        while(Math.abs(error) < coordThreshold && Globals.opMode.opModeIsActive()){
-            posPid.getOutput(error);
+//        angleError = getError(targetAngle, getCurrentAngle());
+        coordError = getError(targetDist, currentY);
 
+        while(Math.abs(coordError) < coordThreshold && Globals.opMode.opModeIsActive()){
+//            setVelocity(posPid.getOutput(coordError), turnPid.getOutput(angleError));
+            setVelocity(posPid.getOutput(coordError), 0);
+
+            // update "y" values
             update();
 
-            error = getError(targetDist, currentY);
+            coordError = getError(targetDist, currentY);
+//            angleError = getError(targetAngle, getCurrentAngle());
         }
+    }
+
+    public void resetEncoders(){
+        lf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 }
