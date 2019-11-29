@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.supers.Auto;
 import org.firstinspires.ftc.teamcode.supers.Globals;
 import org.firstinspires.ftc.teamcode.supers.Hardware;
 
+@Disabled
 public class Test1 extends LinearOpMode {
 
     @Override
