@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.odometryinput;
 
+@Deprecated
 public class Odometry {
     private int xPos;
     private int yPos;

@@ -33,14 +33,6 @@ public class Test1 extends LinearOpMode {
                 robot.tele.rb.setPower(0.0);
             }
 
-            if (gamepad1.right_bumper) robot.tele.servo.setPosition(0.2);
-            if (gamepad1.left_bumper) robot.tele.servo.setPosition(0.8);
-
-            if (gamepad1.y) robot.tele.crServo.setPower(gamepad1.left_stick_y);
-            else robot.tele.crServo.setPower(0);
-
-            telemetry.addData("Servo power: ", "%.2f", robot.tele.crServo.getPower());
-            telemetry.update();
         }
     }
 }
