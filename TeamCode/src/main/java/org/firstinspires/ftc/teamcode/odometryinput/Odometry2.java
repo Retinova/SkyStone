@@ -170,6 +170,14 @@ public class Odometry2 {
         if(deltaX < 0 && deltaY < 0) angleQuad = Quadrant.III;
         if(deltaX >= 0 && deltaY < 0) angleQuad = Quadrant.IV;*/
 
+        double wheelDiam = 4.0;
+        double ticksPerRev = 280.0;
+        double gearReduction = (2.0/3.0);
+        double ticksPerInch = (ticksPerRev * gearReduction) / (wheelDiam * Math.PI);
+
+        deltaX *= ticksPerInch;
+        deltaY *= ticksPerInch;
+
         // get the angle to turn for aligning with the hypotenuse from inverse tan, subtract 90 to shift into proper robot orientation
         double targetAngle = Math.toDegrees(Math.atan2(deltaY, deltaX)) - 90;
 
