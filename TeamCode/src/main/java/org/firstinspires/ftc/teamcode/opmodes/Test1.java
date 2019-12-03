@@ -4,11 +4,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.supers.Robot;
 
-@TeleOp(name="test of robot and also code modularization", group="teleop")
+@TeleOp(name="teleop", group="teleop")
 public class Test1 extends LinearOpMode {
     Robot robot;
     double speedSetting = 1.0;
     double pos = 0.0;
+    boolean toggle, lastA, lastRight, lastLeft = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -18,6 +19,11 @@ public class Test1 extends LinearOpMode {
         robot.init();
 
         robot.win();
+
+        // reset servos
+        robot.tele.lservo.setPosition(0.9);
+        robot.tele.rservo.setPosition(0.0);
+        robot.tele.hook.setPosition(0.65);
 
         waitForStart();
 
@@ -40,10 +46,39 @@ public class Test1 extends LinearOpMode {
             robot.tele.rb.setPower(rb);
 
             // intake servo positions
-            if(gamepad1.dpad_up) pos += 0.1;
-            if(gamepad1.dpad_down) pos -= 0.1;
+            // lservo {0.2, 1.0}
+            // rservo {0.8, 0.0}
+            // hook {0.65, 0.25}
+//            robot.tele.hook.setPosition(pos);
 
-            robot.tele.lservo.setPosition(pos);
+            if(gamepad1.right_bumper){
+                robot.tele.lservo.setPosition(0.9);
+                robot.tele.rservo.setPosition(0.0);
+//                if(pos != 1.0) pos += 0.1;
+
+            }
+            if(gamepad1.left_bumper){
+                robot.tele.lservo.setPosition(0.15);
+                robot.tele.rservo.setPosition(0.85);
+//                if(pos != 0.0) pos -= 0.1;
+            }
+
+            lastRight = gamepad1.right_bumper;
+            lastLeft = gamepad1.left_bumper;
+
+//            robot.tele.lservo.setPosition(1 - pos);
+//            robot.tele.rservo.setPosition(pos);
+
+            if(gamepad1.a){
+                robot.tele.hook.setPosition(0.65);
+//                toggle = !toggle;
+            }
+            if(gamepad1.y){
+                robot.tele.hook.setPosition(0.25);
+//                toggle = !toggle;
+            }
+
+//            lastA = gamepad1.a;
 
             // sweeper
             robot.tele.rsweeper.setPower(gamepad1.right_trigger - gamepad1.left_trigger);

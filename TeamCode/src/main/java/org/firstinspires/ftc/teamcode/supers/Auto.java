@@ -50,7 +50,7 @@ public class Auto {
 
         lf.setDirection(DcMotorSimple.Direction.REVERSE);
         lb.setDirection(DcMotorSimple.Direction.REVERSE);
-        rsweeper.setDirection(DcMotorSimple.Direction.REVERSE);
+        lsweeper.setDirection(DcMotorSimple.Direction.REVERSE);
 
         imu = Globals.hwMap.get(BNO055IMU.class, "imu");
         params.angleUnit = BNO055IMU.AngleUnit.DEGREES;

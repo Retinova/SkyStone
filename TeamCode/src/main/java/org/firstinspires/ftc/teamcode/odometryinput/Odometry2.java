@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.supers.Globals;
 import org.firstinspires.ftc.teamcode.supers.Quadrant;
@@ -20,7 +21,7 @@ public class Odometry2 {
     private double angleError;
     // TODO: set threshhold + tuning
     private double turnThreshhold;
-    private PIDController turnPid = new PIDController(0, 0, 0);
+    private PIDController turnPid = new PIDController(0.005, 0, 0);
 
 //    private double currentX = 0;
     private double currentY = 0;
@@ -69,10 +70,14 @@ public class Odometry2 {
 
         lf.setDirection(DcMotorSimple.Direction.REVERSE);
         lb.setDirection(DcMotorSimple.Direction.REVERSE);
+        lsweeper.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void initGyro(){
-        imu.initialize(params);
+        ElapsedTime timer = new ElapsedTime();
+        while(timer.seconds() < 5 && imu.getSystemStatus() != BNO055IMU.SystemStatus.RUNNING_FUSION) {
+            imu.initialize(params);
+        }
         isInitialized = true;
     }
 
