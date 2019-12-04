@@ -42,5 +42,4 @@ public class Test1 extends LinearOpMode {
             telemetry.addData("Servo power: ", "%.2f", robot.tele.crServo.getPower());
             telemetry.update();
         }
-    }
 }
