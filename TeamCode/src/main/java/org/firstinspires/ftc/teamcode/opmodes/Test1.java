@@ -88,5 +88,4 @@ public class Test1 extends LinearOpMode {
             telemetry.update();
 
         }
-    }
 }
