@@ -78,8 +78,9 @@ public class Auto {
 
         double wheelDiam = 4.0;
         double ticksPerRev = 280.0;
-        double gearReduction = (2.0/3.0);
-        double ticksPerInch = (ticksPerRev * gearReduction) / (wheelDiam * Math.PI);
+        double ticks = ticksPerRev * 3;
+        double inches = wheelDiam * Math.PI * 2;
+        double ticksPerInch = ticks/inches;
 
         if (direction == Direction.FORWARD) {
             distance = distance * ticksPerInch;
