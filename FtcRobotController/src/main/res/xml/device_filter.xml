@@ -47,4 +47,7 @@ https://developer.android.com/guide/topics/connectivity/usb/host
         in our activity when cameras attach. See FtcRobotControllerActivity. -->
    <usb-device class="14" subclass="2"/>
 
+   <!-- Mouse detection attempt -->
+   <usb-device vendor-id="1121" product-id="19727" class="3" />
+
 </resources>
