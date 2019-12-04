@@ -3,16 +3,17 @@ package org.firstinspires.ftc.teamcode.odometryinput;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.supers.Globals;
 import org.firstinspires.ftc.teamcode.supers.Quadrant;
 
 public class Odometry2 {
 
-    private final DcMotor lf, lb, rf, rb;
-    public final Servo servo;
-    public final CRServo crServo;
+    private final DcMotor lf, lb, rf, rb, lsweeper, rsweeper;
+    public final Servo lservo, rservo, hook;
 
     private final BNO055IMU imu;
     public BNO055IMU.Parameters params = new BNO055IMU.Parameters();
@@ -20,7 +21,7 @@ public class Odometry2 {
     private double angleError;
     // TODO: set threshhold + tuning
     private double turnThreshhold;
-    private PIDController turnPid = new PIDController(0, 0, 0);
+    private PIDController turnPid = new PIDController(0.005, 0, 0);
 
 //    private double currentX = 0;
     private double currentY = 0;
@@ -37,13 +38,17 @@ public class Odometry2 {
 
 
     public Odometry2(){
-        servo = Globals.hwMap.servo.get("servo");
-        crServo = Globals.hwMap.crservo.get("crservo");
+        lservo = Globals.hwMap.servo.get("lservo");
+        rservo = Globals.hwMap.servo.get("rservo");
+        hook = Globals.hwMap.servo.get("hook");
 
         lf = Globals.hwMap.dcMotor.get("lf");
         lb = Globals.hwMap.dcMotor.get("lb");
         rf = Globals.hwMap.dcMotor.get("rf");
         rb = Globals.hwMap.dcMotor.get("rb");
+
+        lsweeper = Globals.hwMap.dcMotor.get("lsweeper");
+        rsweeper = Globals.hwMap.dcMotor.get("rsweeper");
 
         imu = Globals.hwMap.get(BNO055IMU.class, "imu");
         params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -53,15 +58,26 @@ public class Odometry2 {
         lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lsweeper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rsweeper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         lf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lsweeper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rsweeper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        lf.setDirection(DcMotorSimple.Direction.REVERSE);
+        lb.setDirection(DcMotorSimple.Direction.REVERSE);
+        lsweeper.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void initGyro(){
-        imu.initialize(params);
+        ElapsedTime timer = new ElapsedTime();
+        while(timer.seconds() < 5 && imu.getSystemStatus() != BNO055IMU.SystemStatus.RUNNING_FUSION) {
+            imu.initialize(params);
+        }
         isInitialized = true;
     }
 
@@ -158,6 +174,14 @@ public class Odometry2 {
         if(deltaX < 0 && deltaY >= 0) angleQuad = Quadrant.II;
         if(deltaX < 0 && deltaY < 0) angleQuad = Quadrant.III;
         if(deltaX >= 0 && deltaY < 0) angleQuad = Quadrant.IV;*/
+
+        double wheelDiam = 4.0;
+        double ticksPerRev = 280.0;
+        double gearReduction = (2.0/3.0);
+        double ticksPerInch = (ticksPerRev * gearReduction) / (wheelDiam * Math.PI);
+
+        deltaX *= ticksPerInch;
+        deltaY *= ticksPerInch;
 
         // get the angle to turn for aligning with the hypotenuse from inverse tan, subtract 90 to shift into proper robot orientation
         double targetAngle = Math.toDegrees(Math.atan2(deltaY, deltaX)) - 90;

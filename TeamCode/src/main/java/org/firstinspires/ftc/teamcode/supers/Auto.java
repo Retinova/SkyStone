@@ -3,12 +3,15 @@ package org.firstinspires.ftc.teamcode.supers;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Auto {
-    private final DcMotor lf, lb, rf, rb;
-    public final Servo servo;
-    public final CRServo crServo;
+    private final DcMotor lf, lb, rf, rb, lsweeper, rsweeper;
+    public final Servo lservo, rservo, hook;
+    public final TouchSensor intake;
 
     private final BNO055IMU imu;
     public BNO055IMU.Parameters params = new BNO055IMU.Parameters();
@@ -17,13 +20,37 @@ public class Auto {
 
 
     public Auto(){
-        servo = Globals.hwMap.servo.get("servo");
-        crServo = Globals.hwMap.crservo.get("crservo");
+        lservo = Globals.hwMap.servo.get("lservo");
+        rservo = Globals.hwMap.servo.get("rservo");
+        hook = Globals.hwMap.servo.get("hook");
 
         lf = Globals.hwMap.dcMotor.get("lf");
         lb = Globals.hwMap.dcMotor.get("lb");
         rf = Globals.hwMap.dcMotor.get("rf");
         rb = Globals.hwMap.dcMotor.get("rb");
+
+        lsweeper = Globals.hwMap.dcMotor.get("lsweeper");
+        rsweeper = Globals.hwMap.dcMotor.get("rsweeper");
+
+        intake = Globals.hwMap.touchSensor.get("intake");
+
+        lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lsweeper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rsweeper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        lf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lsweeper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rsweeper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        lf.setDirection(DcMotorSimple.Direction.REVERSE);
+        lb.setDirection(DcMotorSimple.Direction.REVERSE);
+        lsweeper.setDirection(DcMotorSimple.Direction.REVERSE);
 
         imu = Globals.hwMap.get(BNO055IMU.class, "imu");
         params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -51,8 +78,9 @@ public class Auto {
 
         double wheelDiam = 4.0;
         double ticksPerRev = 280.0;
-        double gearReduction = (2.0/3.0);
-        double ticksPerInch = (ticksPerRev * gearReduction) / (wheelDiam * Math.PI);
+        double ticks = ticksPerRev * 3;
+        double inches = wheelDiam * Math.PI * 2;
+        double ticksPerInch = ticks/inches;
 
         if (direction == Direction.FORWARD) {
             distance = distance * ticksPerInch;
@@ -125,6 +153,33 @@ public class Auto {
             resetEncoders();
 
         }
+    }
+
+    public void autoIntake(){
+        lsweeper.setPower(1.0);
+        rsweeper.setPower(1.0);
+
+        ElapsedTime intakeTimer = new ElapsedTime();
+
+
+        lf.setPower(0.2);
+        lb.setPower(0.2);
+        rf.setPower(0.2);
+        rb.setPower(0.2);
+
+        intakeTimer.reset();
+
+        while(intakeTimer.seconds() < 7 && !intake.isPressed()){
+
+        }
+
+        lf.setPower(0);
+        lb.setPower(0);
+        rf.setPower(0);
+        rb.setPower(0);
+
+        lsweeper.setPower(0);
+        rsweeper.setPower(0);
     }
 
     public void resetEncoders(){

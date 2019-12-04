@@ -29,7 +29,7 @@ public class Robot {
     }
 
     public void initGyro(){
-        auto.initGyro();
+//        auto.initGyro();
         odo.initGyro();
     }
 
