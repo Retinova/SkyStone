@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.supers.Mode;
 import org.firstinspires.ftc.teamcode.supers.Robot;
 
 @TeleOp(name="teleop", group="teleop")
@@ -16,7 +18,7 @@ public class Test1 extends LinearOpMode {
 
         robot = new Robot(this);
 
-        robot.init();
+        robot.init(Mode.TELEOP);
 
         robot.win();
 
@@ -27,7 +29,7 @@ public class Test1 extends LinearOpMode {
 
         waitForStart();
 
-        while(opModeIsActive()) {
+        while (opModeIsActive()) {
 
 
             // mecannum math
@@ -51,13 +53,13 @@ public class Test1 extends LinearOpMode {
             // hook {0.65, 0.25}
 //            robot.tele.hook.setPosition(pos);
 
-            if(gamepad1.right_bumper){
+            if (gamepad1.right_bumper) {
                 robot.tele.lservo.setPosition(0.9);
                 robot.tele.rservo.setPosition(0.0);
 //                if(pos != 1.0) pos += 0.1;
 
             }
-            if(gamepad1.left_bumper){
+            if (gamepad1.left_bumper) {
                 robot.tele.lservo.setPosition(0.15);
                 robot.tele.rservo.setPosition(0.85);
 //                if(pos != 0.0) pos -= 0.1;
@@ -69,11 +71,11 @@ public class Test1 extends LinearOpMode {
 //            robot.tele.lservo.setPosition(1 - pos);
 //            robot.tele.rservo.setPosition(pos);
 
-            if(gamepad1.a){
+            if (gamepad1.a) {
                 robot.tele.hook.setPosition(0.65);
 //                toggle = !toggle;
             }
-            if(gamepad1.y){
+            if (gamepad1.y) {
                 robot.tele.hook.setPosition(0.25);
 //                toggle = !toggle;
             }
@@ -88,4 +90,5 @@ public class Test1 extends LinearOpMode {
             telemetry.update();
 
         }
+    }
 }

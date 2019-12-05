@@ -83,28 +83,28 @@ public class Auto {
         double ticksPerInch = ticks/inches;
 
         if (direction == Direction.FORWARD) {
-            distance = distance * ticksPerInch;
+            distance *= ticksPerInch;
             newLeftFrontTarget = lf.getCurrentPosition() + (int) distance;
             newLeftBackTarget = lb.getCurrentPosition() + (int) distance;
             newRightFrontTarget = rf.getCurrentPosition() + (int) distance;
             newRightBackTarget = rb.getCurrentPosition() + (int) distance;
         }
         if (direction == Direction.BACK) {
-            distance = distance * ticksPerInch;
+            distance *= ticksPerInch;
             newLeftFrontTarget = lf.getCurrentPosition() + (int) distance;
             newLeftBackTarget = lb.getCurrentPosition() + (int) distance;
             newRightFrontTarget = rf.getCurrentPosition() + (int) distance;
             newRightBackTarget = rb.getCurrentPosition() + (int) distance;
         }
         if (direction == Direction.LEFT) {
-            distance = distance * ticksPerInch;
+            distance *= ticksPerInch;
             newLeftFrontTarget = lf.getCurrentPosition() - (int) distance;
             newLeftBackTarget = lb.getCurrentPosition() + (int) distance;
             newRightFrontTarget = rf.getCurrentPosition() + (int) distance;
             newRightBackTarget = rb.getCurrentPosition() - (int) distance;
         }
         if (direction == Direction.RIGHT) {
-            distance = distance * ticksPerInch;
+            distance *= ticksPerInch;
             newLeftFrontTarget = lf.getCurrentPosition() - (int) distance;
             newLeftBackTarget = lb.getCurrentPosition() + (int) distance;
             newRightFrontTarget = rf.getCurrentPosition() + (int) distance;

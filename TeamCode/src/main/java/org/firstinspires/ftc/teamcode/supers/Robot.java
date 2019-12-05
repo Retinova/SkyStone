@@ -18,14 +18,16 @@ public class Robot {
         isInitialized = true;
     }
 
-    public void init(){
+    public void init(Mode mode){
         if(!isInitialized) throw new IllegalStateException("Robot class uninitialized. Construct Robot instance in runOpMode()");
 
-        tele = new TeleOp();
-        auto = new Auto();
-        odo = new Odometry2();
+        if(mode == Mode.AUTO) {
+            auto = new Auto();
+            odo = new Odometry2();
+            initGyro();
+        }
 
-        initGyro();
+        else tele = new TeleOp();
     }
 
     public void initGyro(){

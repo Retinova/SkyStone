@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.odometryinput;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -81,7 +80,6 @@ public class Odometry2 {
         isInitialized = true;
     }
 
-
     public void setVelocity(double forward, double clockwise){
         // TODO: make sure directions are correct
         double right = forward - clockwise;
@@ -97,18 +95,20 @@ public class Odometry2 {
     public void turnTo(double angle){
 
         // use 0 - 360
-        if(angle >= 180){
+        if(angle >= 180 || angle <= -180){
+            if(angle <= -180) angle = normalize(angle);
+
             turnPid.start();
-            angleError = getError(angle, normLeft(getCurrentAngle()));
+            angleError = getError(angle, normalize(getCurrentAngle()));
 
             while(Math.abs(angleError) < turnThreshhold && Globals.opMode.opModeIsActive()){
                 setVelocity(0, turnPid.getOutput(angleError));
 
-                angleError = getError(angle, normLeft(getCurrentAngle()));
+                angleError = getError(angle, normalize(getCurrentAngle()));
             }
         }
         // use 0 - -360
-        else if(angle <= -180){
+        /*else if(angle <= -180){
             turnPid.start();
 
             angleError = getError(angle, normRight(getCurrentAngle()));
@@ -119,7 +119,7 @@ public class Odometry2 {
                 angleError = getError(angle, normRight(getCurrentAngle()));
             }
 
-        }
+        }*/
         // use 180 - -180
         else{
             turnPid.start();
@@ -140,18 +140,20 @@ public class Odometry2 {
         else throw new IllegalStateException("Robot/gyro not properly initialized");
     }
 
+    @Deprecated
     public double normRight(double angle){
         if(angle > 0) return angle - 360;
         else return angle;
     }
 
-    public double normLeft(double angle){
+    public double normalize(double angle){
+        angle = angle % 360;
         if(angle < 0) return angle + 360;
         else return angle;
     }
 
     public double getError(double target, double actual){
-        return actual - target;
+        return normalize(actual - target);
     }
 
     public void update(){

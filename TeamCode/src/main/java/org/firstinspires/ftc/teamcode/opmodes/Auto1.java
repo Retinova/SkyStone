@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.supers.Direction;
+import org.firstinspires.ftc.teamcode.supers.Mode;
 import org.firstinspires.ftc.teamcode.supers.Robot;
 
 @Autonomous(name="foundation park", group="auto")
@@ -14,7 +15,7 @@ public class Auto1 extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this);
 
-        robot.init();
+        robot.init(Mode.AUTO);
 
         robot.win();
 

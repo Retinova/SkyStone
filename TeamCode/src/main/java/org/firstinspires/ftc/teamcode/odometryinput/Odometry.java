@@ -107,8 +107,8 @@ public class Odometry {
 //
 //        // target is negative, but still turning left
 //        else{
-//            target = normLeft(target);
-//            normalizedAngle = normLeft(rawAngle);
+//            target = normalize(target);
+//            normalizedAngle = normalize(rawAngle);
 //            // use pid on normalized angle
 //            // TODO: pid
 //        }
