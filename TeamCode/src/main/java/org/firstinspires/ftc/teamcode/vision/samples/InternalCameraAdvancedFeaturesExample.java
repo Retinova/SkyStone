@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.vision.samples;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -13,6 +14,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
 
+@Disabled
 @TeleOp(name="advance features", group="vision")
 public class InternalCameraAdvancedFeaturesExample extends LinearOpMode {
     /**

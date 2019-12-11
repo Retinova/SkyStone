@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.supers.Direction;
 import org.firstinspires.ftc.teamcode.supers.Mode;
 import org.firstinspires.ftc.teamcode.supers.Robot;
 
+@Disabled
 @Autonomous(name="foundation park", group="auto")
 public class Auto1 extends LinearOpMode {
     Robot robot;

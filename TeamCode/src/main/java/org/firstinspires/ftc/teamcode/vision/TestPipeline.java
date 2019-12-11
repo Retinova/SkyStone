@@ -15,7 +15,7 @@ public class TestPipeline extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {
         Mat inRange = new Mat();
-        Core.inRange(input, new Scalar(0, 0, 0), new Scalar(0, 0, 11.8), inRange);
+        Core.inRange(input, new Scalar(0, 0, 0), new Scalar(180, 255, 30), inRange);
 
         switch(stageToRender) {
             case RAW_IMAGE:
