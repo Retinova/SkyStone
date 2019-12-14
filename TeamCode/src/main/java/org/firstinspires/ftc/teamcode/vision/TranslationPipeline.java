@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.vision;
 
-import com.qualcomm.robotcore.util.RobotLog;
-
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -16,36 +14,46 @@ import java.util.ArrayList;
 public class TranslationPipeline extends OpenCvPipeline {
     enum Stage{INPUT, YELLOWMASK, BLACKMASK, OUTPUT}
     Stage stageToRender = Stage.INPUT;
-    Stage[] vals = Stage.values();
+    private Stage[] vals = Stage.values();
+
+    private Mat output = new Mat();
+    private int img_h, img_w, channels;
+
+    private Mat yellowMask = new Mat();
+    private ArrayList<MatOfPoint> yBlockContours = new ArrayList<>();
+    private Mat hier1 = new Mat();
+
+    private ArrayList<Double> contourAreas = new ArrayList<>();
+    private double largestArea = 0;
+    private int currentIndex = 0;
+    private int indexOfYellowArea = 0;
+    private MatOfPoint yellowArea;
+    private Rect roiRect;
+    private Rect offsetROI = new Rect();
+    private int rectX, rectY, rectW, rectH;
+    private final int yOffset = 40;
+    private Mat roi = new Mat();
+
+    private Mat blackMask = new Mat();
+    private Mat blackMaskResize = new Mat();
+    private ArrayList<MatOfPoint> bBlockContours = new ArrayList<>();
+    private Mat hier2 = new Mat();
+
+    private ArrayList<MatOfPoint> bestContours = new ArrayList<>();
 
     @Override
     public Mat processFrame(Mat input){
         Imgproc.cvtColor(input, input, Imgproc.COLOR_RGBA2BGR);
-        Mat scrap = input.clone();
-        int img_h = input.height(), img_w = input.width(), channels = input.channels();
+        img_h = input.height();
+        img_w = input.width();
+        channels = input.channels();
+        input.copyTo(output);
 
-        Mat yellowMask = new Mat();
-        ArrayList<MatOfPoint> yBlockContours = new ArrayList<>();
-        Mat hier1 = new Mat();
+        input.copyTo(blackMaskResize);
 
-        ArrayList<Double> contourAreas = new ArrayList<>();
-        double largestArea = 0;
-        int currentIndex = 0;
-        int indexOfYellowArea = 0;
-        MatOfPoint yellowArea;
-        Rect roiRect;
-        Rect offsetROI;
-        int roiX, roiY, roiW, roiH;
-        int yOffset = 40;
-        Mat roi;
-
-        Mat blackMask = new Mat();
-        ArrayList<MatOfPoint> bBlockContours = new ArrayList<>();
-        Mat hier2 = new Mat();
-
-        ArrayList<MatOfPoint> bestContours = new ArrayList<>();
-
-
+        largestArea = 0;
+        currentIndex = 0;
+        indexOfYellowArea = 0;
 
         Core.inRange(input, new Scalar(0, 160, 220), new Scalar(55, 210, 255), yellowMask);
 
@@ -69,17 +77,23 @@ public class TranslationPipeline extends OpenCvPipeline {
             yellowArea = yBlockContours.get(indexOfYellowArea);
 
             roiRect = Imgproc.boundingRect(yellowArea);
-            roiX = roiRect.x;
-            roiY = roiRect.y;
-            roiW = roiRect.width;
-            roiH = roiRect.height;
-            if(roiY - yOffset >= 0 && roiH + yOffset <= img_h) offsetROI = new Rect(0, roiY - yOffset, img_w, roiH + yOffset);
-            else offsetROI = new Rect(0, roiY, img_w, roiH);
+            rectX = roiRect.x;
+            rectY = roiRect.y;
+            rectW = roiRect.width;
+            rectH = roiRect.height;
 
-            roi = input.submat(offsetROI);
+            if(rectY - yOffset >= 0 && rectH + yOffset <= img_h) {
+                offsetROI.set(new double[]{0, rectY - yOffset, img_w, rectH + yOffset});
+            }
+            else {
+                offsetROI.set(new double[]{0, rectY, img_w, rectH});
+            }
 
-            Imgproc.rectangle(scrap, roiRect, new Scalar(0, 255, 0), 10);
-            Imgproc.rectangle(scrap, offsetROI, new Scalar(0, 0, 255), 10);
+
+            if(roi != null) roi = input.submat(offsetROI);
+
+            Imgproc.rectangle(output, roiRect, new Scalar(0, 255, 0), 10);
+            Imgproc.rectangle(output, offsetROI, new Scalar(0, 0, 255), 10);
 
             Core.inRange(roi, new Scalar(0, 0, 0), new Scalar(30, 30, 30), blackMask);
 
@@ -95,10 +109,15 @@ public class TranslationPipeline extends OpenCvPipeline {
 
                 for (MatOfPoint contour : bestContours) {
                     Rect temp = Imgproc.boundingRect(contour);
-                    Imgproc.rectangle(scrap, new Point(temp.x, roiY - yOffset + temp.y), new Point(temp.x + temp.width, roiY - yOffset + temp.y + temp.height), new Scalar(255, 0, 200), 30);
+                    Imgproc.rectangle(output, new Point(temp.x, rectY - yOffset + temp.y), new Point(temp.x + temp.width, rectY - yOffset + temp.y + temp.height), new Scalar(255, 0, 200), 30);
                 }
             }
         }
+
+        yBlockContours.clear();
+        contourAreas.clear();
+        bBlockContours.clear();
+        bestContours.clear();
 
         switch(stageToRender){
             case INPUT:
@@ -106,9 +125,9 @@ public class TranslationPipeline extends OpenCvPipeline {
             case YELLOWMASK:
                 return yellowMask;
             case BLACKMASK:
-                return blackMask;
+                return blackMaskResize;
             case OUTPUT:
-                return scrap;
+                return output;
             default:
                 return input;
         }

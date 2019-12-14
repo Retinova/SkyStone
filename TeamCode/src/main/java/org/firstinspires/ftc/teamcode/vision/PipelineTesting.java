@@ -12,8 +12,9 @@ public class PipelineTesting extends LinearOpMode {
     OpenCvInternalCamera camera;
 //    TranslationPipeline pipeline = new TranslationPipeline();
 //    BlackMask pipeline = new BlackMask();
-    YellowMask pipeline = new YellowMask();
-//    TestPipeline pipeline = new TestPipeline();
+//    YellowMask pipeline = new YellowMask();
+//    BlackPipeline pipeline = new BlackPipeline();
+    BluePipeline pipeline = new BluePipeline();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -32,9 +33,11 @@ public class PipelineTesting extends LinearOpMode {
 
         while(opModeIsActive()) {
 //            telemetry.addData("Current Layer: ", pipeline.stageToRender);
+//            if(pipeline.chosenCenter != null) telemetry.addData("Center: ", pipeline.chosenCenter);
             telemetry.update();
         }
 
+        camera.stopStreaming();
         camera.closeCameraDevice();
     }
 }
