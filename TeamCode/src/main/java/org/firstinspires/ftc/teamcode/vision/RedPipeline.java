@@ -11,14 +11,16 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
 
-public class BluePipeline extends OpenCvPipeline {
-    enum Stage{INPUT, BLURRED, BLUEMASK, OUTPUT}
+public class RedPipeline extends OpenCvPipeline {
+    enum Stage{INPUT, BLURRED, REDMASK, OUTPUT}
     Stage stageToRender = Stage.INPUT;
     Stage[] vals = Stage.values();
 
     private Mat blurred = new Mat();
 
-    private Mat blueMask = new Mat();
+    private Mat redMaskUpper = new Mat();
+    private Mat redMaskLower = new Mat();
+    private Mat redMaskTotal = new Mat();
     private ArrayList<MatOfPoint> foundationContours = new ArrayList<>();
     private Mat hier = new Mat();
 
@@ -46,9 +48,12 @@ public class BluePipeline extends OpenCvPipeline {
         currentIndex = 0;
         indexOfFoundationArea = 0;
 
-        Core.inRange(blurred, new Scalar(100, 20, 110), new Scalar(120, 80, 155), blueMask);
+        Core.inRange(blurred, new Scalar(0, 150, 210), new Scalar(5, 195, 255), redMaskLower);
+        Core.inRange(blurred, new Scalar(175, 150, 210), new Scalar(180, 195, 255), redMaskUpper);
 
-        Imgproc.findContours(blueMask, foundationContours, hier, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+        Core.bitwise_and(redMaskLower, redMaskUpper, redMaskTotal);
+
+        Imgproc.findContours(redMaskTotal, foundationContours, hier, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         if(!foundationContours.isEmpty()){
             for(MatOfPoint contour : foundationContours){
@@ -78,8 +83,8 @@ public class BluePipeline extends OpenCvPipeline {
                 return input;
             case BLURRED:
                 return blurred;
-            case BLUEMASK:
-                return blueMask;
+            case REDMASK:
+                return redMaskUpper;
             case OUTPUT:
                 return output;
             default:

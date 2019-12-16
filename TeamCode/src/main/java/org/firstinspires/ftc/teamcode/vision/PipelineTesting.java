@@ -13,8 +13,9 @@ public class PipelineTesting extends LinearOpMode {
 //    TranslationPipeline pipeline = new TranslationPipeline();
 //    BlackMask pipeline = new BlackMask();
 //    YellowMask pipeline = new YellowMask();
-//    BlackPipeline pipeline = new BlackPipeline();
-    BluePipeline pipeline = new BluePipeline();
+    BlackPipeline pipeline = new BlackPipeline();
+//    BluePipeline pipeline = new BluePipeline();
+//    RedPipeline pipeline = new RedPipeline();
 
     @Override
     public void runOpMode() throws InterruptedException {

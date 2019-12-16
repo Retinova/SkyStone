@@ -6,15 +6,18 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
 
 public class BlackPipeline extends OpenCvPipeline {
-    enum Stage{INPUT, BLACKMASK, OUTPUT}
+    enum Stage{INPUT, BLURRED, BLACKMASK, OUTPUT}
     Stage stageToRender = Stage.INPUT;
     Stage[] vals = Stage.values();
+
+    private Mat blurred = new Mat();
 
     private Mat blackMask = new Mat();
     private ArrayList<MatOfPoint> bBlockContours = new ArrayList<>();
@@ -36,6 +39,9 @@ public class BlackPipeline extends OpenCvPipeline {
         Imgproc.cvtColor(input, input, Imgproc.COLOR_RGBA2RGB);
 
         input.copyTo(output);
+
+        // TODO: blur fix
+        Imgproc.blur(input, blurred, new Size(7, 7));
 
         Core.inRange(input, new Scalar(0, 0, 0), new Scalar(50, 50, 50), blackMask);
 
@@ -75,6 +81,8 @@ public class BlackPipeline extends OpenCvPipeline {
         switch(stageToRender){
             case INPUT:
                 return input;
+            case BLURRED:
+                return blurred;
             case BLACKMASK:
                 return blackMask;
             case OUTPUT:
