@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.vision;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.vision.actualpipelines.BlackPipeline;
+import org.firstinspires.ftc.teamcode.vision.actualpipelines.BluePipeline;
+import org.firstinspires.ftc.teamcode.vision.actualpipelines.RedPipeline;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
@@ -11,7 +14,6 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 public class PipelineTesting extends LinearOpMode {
     OpenCvInternalCamera camera;
 //    TranslationPipeline pipeline = new TranslationPipeline();
-//    BlackMask pipeline = new BlackMask();
 //    YellowMask pipeline = new YellowMask();
     BlackPipeline pipeline = new BlackPipeline();
 //    BluePipeline pipeline = new BluePipeline();

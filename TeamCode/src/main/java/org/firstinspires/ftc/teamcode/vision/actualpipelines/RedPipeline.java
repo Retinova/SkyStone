@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.vision;
+package org.firstinspires.ftc.teamcode.vision.actualpipelines;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -48,10 +48,10 @@ public class RedPipeline extends OpenCvPipeline {
         currentIndex = 0;
         indexOfFoundationArea = 0;
 
-        Core.inRange(blurred, new Scalar(0, 150, 210), new Scalar(5, 195, 255), redMaskLower);
-        Core.inRange(blurred, new Scalar(175, 150, 210), new Scalar(180, 195, 255), redMaskUpper);
+        Core.inRange(blurred, new Scalar(0, 140, 180), new Scalar(10, 200, 255), redMaskLower);
+        Core.inRange(blurred, new Scalar(170, 140, 180), new Scalar(180, 200, 255), redMaskUpper);
 
-        Core.bitwise_and(redMaskLower, redMaskUpper, redMaskTotal);
+        Core.bitwise_or(redMaskLower, redMaskUpper, redMaskTotal);
 
         Imgproc.findContours(redMaskTotal, foundationContours, hier, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
@@ -84,7 +84,7 @@ public class RedPipeline extends OpenCvPipeline {
             case BLURRED:
                 return blurred;
             case REDMASK:
-                return redMaskUpper;
+                return redMaskTotal;
             case OUTPUT:
                 return output;
             default:

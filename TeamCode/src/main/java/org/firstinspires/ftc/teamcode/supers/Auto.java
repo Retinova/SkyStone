@@ -77,10 +77,9 @@ public class Auto {
         int newRightBackTarget = 0;
 
         double wheelDiam = 4.0;
-        double ticksPerRev = 280.0;
-        double ticks = ticksPerRev * 3;
-        double inches = wheelDiam * Math.PI * 2;
-        double ticksPerInch = ticks/inches;
+        double ticksPerRev = 537.6;
+        double inchesPerRev = wheelDiam * Math.PI;
+        double ticksPerInch = ticksPerRev/inchesPerRev;
 
         if (direction == Direction.FORWARD) {
             distance *= ticksPerInch;
