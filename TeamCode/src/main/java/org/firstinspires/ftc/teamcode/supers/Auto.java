@@ -8,6 +8,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.vision.actualpipelines.BlackPipeline;
+import org.openftc.easyopencv.OpenCvPipeline;
+
 public class Auto {
     private final DcMotor lf, lb, rf, rb, lsweeper, rsweeper;
     public final Servo lservo, rservo, hook;
@@ -22,17 +25,17 @@ public class Auto {
     public Auto(){
         lservo = Globals.hwMap.servo.get("lservo");
         rservo = Globals.hwMap.servo.get("rservo");
-        hook = Globals.hwMap.servo.get("hook");
+        hook = Globals.hwMap.servo.get("back");
 
         lf = Globals.hwMap.dcMotor.get("lf");
         lb = Globals.hwMap.dcMotor.get("lb");
         rf = Globals.hwMap.dcMotor.get("rf");
         rb = Globals.hwMap.dcMotor.get("rb");
 
-        lsweeper = Globals.hwMap.dcMotor.get("lsweeper");
-        rsweeper = Globals.hwMap.dcMotor.get("rsweeper");
+        lsweeper = Globals.hwMap.dcMotor.get("lsweep");
+        rsweeper = Globals.hwMap.dcMotor.get("rsweep");
 
-        intake = Globals.hwMap.touchSensor.get("intake");
+        intake = Globals.hwMap.touchSensor.get("input");
 
         lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -50,7 +53,8 @@ public class Auto {
 
         lf.setDirection(DcMotorSimple.Direction.REVERSE);
         lb.setDirection(DcMotorSimple.Direction.REVERSE);
-        lsweeper.setDirection(DcMotorSimple.Direction.REVERSE);
+//        rsweeper.setDirection(DcMotorSimple.Direction.REVERSE);
+        lservo.setDirection(Servo.Direction.REVERSE);
 
         imu = Globals.hwMap.get(BNO055IMU.class, "imu");
         params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -90,10 +94,10 @@ public class Auto {
         }
         if (direction == Direction.BACK) {
             distance *= ticksPerInch;
-            newLeftFrontTarget = lf.getCurrentPosition() + (int) distance;
-            newLeftBackTarget = lb.getCurrentPosition() + (int) distance;
-            newRightFrontTarget = rf.getCurrentPosition() + (int) distance;
-            newRightBackTarget = rb.getCurrentPosition() + (int) distance;
+            newLeftFrontTarget = lf.getCurrentPosition() - (int) distance;
+            newLeftBackTarget = lb.getCurrentPosition() - (int) distance;
+            newRightFrontTarget = rf.getCurrentPosition() - (int) distance;
+            newRightBackTarget = rb.getCurrentPosition() - (int) distance;
         }
         if (direction == Direction.LEFT) {
             distance *= ticksPerInch;
@@ -104,10 +108,10 @@ public class Auto {
         }
         if (direction == Direction.RIGHT) {
             distance *= ticksPerInch;
-            newLeftFrontTarget = lf.getCurrentPosition() - (int) distance;
-            newLeftBackTarget = lb.getCurrentPosition() + (int) distance;
-            newRightFrontTarget = rf.getCurrentPosition() + (int) distance;
-            newRightBackTarget = rb.getCurrentPosition() - (int) distance;
+            newLeftFrontTarget = lf.getCurrentPosition() + (int) distance;
+            newLeftBackTarget = lb.getCurrentPosition() - (int) distance;
+            newRightFrontTarget = rf.getCurrentPosition() - (int) distance;
+            newRightBackTarget = rb.getCurrentPosition() + (int) distance;
         }
 
         // Ensure that the OpMode is still active
@@ -124,10 +128,18 @@ public class Auto {
             rb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // Reset timer and begin to run the motors
-            lf.setPower(Math.abs(speed));
-            lb.setPower(Math.abs(speed));
-            rf.setPower(Math.abs(speed));
-            rb.setPower(Math.abs(speed));
+            if(direction == Direction.LEFT || direction == Direction.RIGHT){
+                lf.setPower(Math.abs(speed));
+                lb.setPower(Math.abs(speed));
+                rf.setPower(Math.abs(speed));
+                rb.setPower(Math.abs(speed));
+            }
+            else {
+                lf.setPower(Math.abs(speed));
+                rf.setPower(Math.abs(speed));
+                lb.setPower(Math.abs(speed));
+                rb.setPower(Math.abs(speed));
+            }
 
             // Keep looping until the motor is at the desired position that was inputted
             while (Globals.opMode.opModeIsActive() &&
@@ -144,10 +156,18 @@ public class Auto {
             }
 
             // Stop all motion
-            lf.setPower(0);
-            rf.setPower(0);
-            lb.setPower(0);
-            rb.setPower(0);
+            if(direction == Direction.LEFT || direction == Direction.RIGHT) {
+                lf.setPower(0);
+                lb.setPower(0);
+                rf.setPower(0);
+                rb.setPower(0);
+            }
+            else {
+                lf.setPower(0);
+                rf.setPower(0);
+                lb.setPower(0);
+                rb.setPower(0);
+            }
 
             resetEncoders();
 
@@ -162,8 +182,8 @@ public class Auto {
 
 
         lf.setPower(0.2);
-        lb.setPower(0.2);
         rf.setPower(0.2);
+        lb.setPower(0.2);
         rb.setPower(0.2);
 
         intakeTimer.reset();
@@ -177,8 +197,23 @@ public class Auto {
         rf.setPower(0);
         rb.setPower(0);
 
+//        lsweeper.setPower(0);
+//        rsweeper.setPower(0);
+    }
+
+    public void output(){
+        ElapsedTime outputTimer = new ElapsedTime();
+
+        lsweeper.setPower(-1.0);
+        rsweeper.setPower(-1.0);
+
+        while(outputTimer.seconds() < 1){
+
+        }
+
         lsweeper.setPower(0);
         rsweeper.setPower(0);
+
     }
 
     public void resetEncoders(){
@@ -192,4 +227,5 @@ public class Auto {
         rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
+
 }

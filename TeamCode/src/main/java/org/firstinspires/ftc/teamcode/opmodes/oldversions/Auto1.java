@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.opmodes.oldversions;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.supers.Direction;
 import org.firstinspires.ftc.teamcode.supers.Mode;
 import org.firstinspires.ftc.teamcode.supers.Robot;
 
+@Deprecated
 @Disabled
 @Autonomous(name="foundation park", group="auto")
 public class Auto1 extends LinearOpMode {

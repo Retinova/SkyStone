@@ -1,17 +1,22 @@
 package org.firstinspires.ftc.teamcode.odometryinput;
 
+import android.media.MediaPlayer;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.android.AndroidOrientation;
 import org.firstinspires.ftc.robotcore.external.android.AndroidTextToSpeech;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.R;
 
+@Disabled
 @TeleOp(name="just a totally normal opmode nothing to see here folks", group="opmode")
 public class Funny extends LinearOpMode {
     AndroidTextToSpeech tts = new AndroidTextToSpeech();
     boolean lasta, lastb, lastx, lasty = false;
     AndroidOrientation gyro = new AndroidOrientation();
+    MediaPlayer mediaPlayer;
     //double[] notes = new double[]{1.125, 1.125, 2.125};
     //int index = 0;
 
@@ -19,9 +24,11 @@ public class Funny extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        tts.initialize();
+        /*tts.initialize();
 
         tts.setLanguageAndCountry("en", "US");
+*/
+//        mediaPlayer = MediaPlayer.create(hardwareMap.appContext, R.raw.funnysound);
 
         if(gyro.isAvailable()){
             gyro.startListening();
@@ -36,26 +43,27 @@ public class Funny extends LinearOpMode {
 
         while(opModeIsActive()){
             if(gamepad1.a && !lasta){
-                tts.speak("sand under table");
+//                tts.speak("sand under table");
+//                mediaPlayer.start();
             }
 
             lasta = gamepad1.a;
 
             if(gamepad1.b && !lastb){
-                tts.speak("Evening Gromit");
+//                tts.speak("Evening Gromit");
             }
 
             lastb = gamepad1.b;
 
             if(gamepad1.x && !lastx){
-                tts.speak("loser");
+//                tts.speak("loser");
             }
 
             lastx = gamepad1.x;
 
             if(gamepad1.y && !lasty){
                 //tts.setPitch((float) notes[index]);
-                tts.speak("OK Boomer");
+//                tts.speak("OK Boomer");
                 //index++;
             }
 
@@ -67,13 +75,15 @@ public class Funny extends LinearOpMode {
             telemetry.addData("Magnitude: ", gyro.getMagnitude());
             telemetry.update();
 
-            tts.setPitch(1);
+//            tts.setPitch(1);
 
 //            if (index >= 2){
 //                index = 0;
 //            }
         }
 
-        tts.close();
+        mediaPlayer.stop();
+
+//        tts.close();
     }
 }

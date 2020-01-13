@@ -26,10 +26,10 @@ public class BlackPipeline extends OpenCvPipeline {
 
     private Mat output = new Mat();
 
-    public Rect chosenRect;
+    public Rect chosenRect = new Rect();
     public Point chosenCenter = new Point();
     private int highestArea = 0;
-    private int highestX = 0;
+    private int lowestX = (int) 1E99;
     private int highestY = 0;
 
     @Override
@@ -44,7 +44,7 @@ public class BlackPipeline extends OpenCvPipeline {
 
         if(!bBlockContours.isEmpty()){
             for(MatOfPoint contour : bBlockContours){
-                if(Imgproc.contourArea(contour) > 2000 && Imgproc.contourArea(contour) < 5750){
+                if(Imgproc.contourArea(contour) > 5000){
                     bestContours.add(contour);
                 }
             }
@@ -53,8 +53,8 @@ public class BlackPipeline extends OpenCvPipeline {
                 Rect temp = Imgproc.boundingRect(contour);
                 currentCenter.set(getCenter(temp));
 
-                if(currentCenter.x > highestX) {
-                    highestX = (int) currentCenter.x;
+                if(currentCenter.x < lowestX) {
+                    lowestX = (int) currentCenter.x;
 //                    highestY = (int) currentCenter.y;
                     chosenRect = temp;
                     chosenCenter.set(getCenter(temp));
@@ -68,7 +68,7 @@ public class BlackPipeline extends OpenCvPipeline {
             }
         }
 
-        highestX = 0;
+        lowestX = (int) 1E99;
 //        highestY = 0;
         bBlockContours.clear();
         bestContours.clear();

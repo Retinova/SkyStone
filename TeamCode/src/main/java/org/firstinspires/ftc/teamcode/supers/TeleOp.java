@@ -21,17 +21,17 @@ public class TeleOp {
     public TeleOp(){
         lservo = Globals.hwMap.servo.get("lservo");
         rservo = Globals.hwMap.servo.get("rservo");
-        hook = Globals.hwMap.servo.get("hook");
+        hook = Globals.hwMap.servo.get("back");
 
         lf = Globals.hwMap.dcMotor.get("lf");
         lb = Globals.hwMap.dcMotor.get("lb");
         rf = Globals.hwMap.dcMotor.get("rf");
         rb = Globals.hwMap.dcMotor.get("rb");
 
-        lsweeper = Globals.hwMap.dcMotor.get("lsweeper");
-        rsweeper = Globals.hwMap.dcMotor.get("rsweeper");
+        lsweeper = Globals.hwMap.dcMotor.get("lsweep");
+        rsweeper = Globals.hwMap.dcMotor.get("rsweep");
 
-        intake = Globals.hwMap.touchSensor.get("intake");
+        intake = Globals.hwMap.touchSensor.get("input");
 
         lf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -49,7 +49,8 @@ public class TeleOp {
 
         lf.setDirection(DcMotorSimple.Direction.REVERSE);
         lb.setDirection(DcMotorSimple.Direction.REVERSE);
-        lsweeper.setDirection(DcMotorSimple.Direction.REVERSE);
+//        rsweeper.setDirection(DcMotorSimple.Direction.REVERSE);
+        lservo.setDirection(Servo.Direction.REVERSE);
 
         imu = Globals.hwMap.get(BNO055IMU.class, "imu");
         params.angleUnit = BNO055IMU.AngleUnit.DEGREES;

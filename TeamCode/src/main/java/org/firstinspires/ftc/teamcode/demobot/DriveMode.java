@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 @TeleOp(name="demobot", group="teleop")
 public class DriveMode extends LinearOpMode {
     DcMotor lf, lb, rf, rb = null;
-    double speedSetting = 1.0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -30,15 +29,34 @@ public class DriveMode extends LinearOpMode {
             double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
             double rightX = -gamepad1.right_stick_x;
 
-            final double lfp = r * Math.sin(robotAngle) * speedSetting + rightX * speedSetting;
-            final double lbp = r * Math.cos(robotAngle) * speedSetting + rightX * speedSetting;
-            final double rfp = r * Math.cos(robotAngle) * speedSetting - rightX * speedSetting;
-            final double rbp = r * Math.sin(robotAngle) * speedSetting - rightX * speedSetting;
+            final double lfp = r * Math.sin(robotAngle) + rightX;
+            final double lbp = r * Math.cos(robotAngle) + rightX;
+            final double rfp = r * Math.cos(robotAngle) - rightX;
+            final double rbp = r * Math.sin(robotAngle) - rightX;
 
-            lf.setPower(lfp);
-            lb.setPower(lbp);
-            rf.setPower(rfp);
-            rb.setPower(rbp);
+            lf.setPower(-lfp);
+            rb.setPower(-rbp);
+            lb.setPower(-lbp);
+            rf.setPower(-rfp);
+
+//            if(gamepad1.a){
+//                lf.setPower(1.0);
+//                lb.setPower(1.0);
+//                rf.setPower(1.0);
+//                rb.setPower(1.0);
+//            }
+//            else{
+//                lf.setPower(0.0);
+//                lb.setPower(0.0);
+//                rf.setPower(0.0);
+//                rb.setPower(0.0);
+//            }
+
+            telemetry.addData("lf power:", lf.getPower());
+            telemetry.addData("lb power:", lb.getPower());
+            telemetry.addData("rf power:", rf.getPower());
+            telemetry.addData("rb power:", rb.getPower());
+            telemetry.update();
         }
     }
 }
