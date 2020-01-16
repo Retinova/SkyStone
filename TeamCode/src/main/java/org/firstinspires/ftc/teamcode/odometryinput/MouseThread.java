@@ -5,50 +5,56 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
-import android.telecom.Call;
 
 import org.firstinspires.ftc.teamcode.supers.Globals;
 
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class MouseThread extends Thread {
-    byte[] data;
-    UsbManager manager;
-    UsbDevice device;
-    UsbInterface intf;
-    UsbEndpoint ep;
-    UsbDeviceConnection connection;
+    private byte[]               data;
+    private final List<byte[]>   allData = Collections.synchronizedList(new ArrayList<byte[]>());
+    private int[]                coords = {0, 0};
 
-//    public static ArrayList<byte[]> allData = new ArrayList<>();
+
+    private UsbInterface         intf;
+    private UsbEndpoint          ep;
+    private UsbDeviceConnection  connection;
 
     public MouseThread(UsbManager manager, UsbDevice device){
-        this.manager = manager;
-        this.device = device;
-
         intf = device.getInterface(0);
         ep = intf.getEndpoint(0);
 
         data = new byte[ep.getMaxPacketSize()];
+        Arrays.fill(data, (byte) 0);
 
         connection = manager.openDevice(device);
         connection.claimInterface(intf, true);
     }
 
-   /* @Override
-    public byte[] call(){
-        connection.bulkTransfer(ep, data, data.length, 2);
-        return data;
-    }*/
-
     @Override
     public void run(){
-//        connection.bulkTransfer(ep, data, data.length, 2);
-//        MouseTest2.bytes = data;
-
         while(Globals.opMode.opModeIsActive()){
-            connection.bulkTransfer(ep, data, data.length, 2);
-            MouseTest2.allData.add(data);
+            connection.bulkTransfer(ep, data, data.length, 0);
+            allData.add(data);
         }
+
+        connection.releaseInterface(intf);
+        connection.close();
+    }
+
+    public int[] getCoords(){
+        synchronized (allData) {
+            if (!allData.isEmpty()) {
+                for (byte[] dataArr : allData) {
+                    coords[0] += (int) dataArr[1];
+                    coords[1] += (int) dataArr[2];
+                }
+                allData.clear();
+            }
+        }
+        return coords;
     }
 }

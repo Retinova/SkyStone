@@ -16,6 +16,9 @@ public class Odometry2 {
     private final DcMotor lf, lb, rf, rb, lsweeper, rsweeper;
     private final Servo lservo, rservo, hook;
 
+    private final int dpi = 1000;
+    private final int fieldLength = 144000;
+
     public final BNO055IMU imu;
     public BNO055IMU.Parameters params = new BNO055IMU.Parameters();
 
@@ -33,10 +36,6 @@ public class Odometry2 {
     private PIDController posPid = new PIDController(0, 0, 0);
 
     private boolean isInitialized = false;
-
-    private final double countsPerInch = 0;
-
-
 
     public Odometry2(){
         lservo = Globals.hwMap.servo.get("lservo");
@@ -117,19 +116,7 @@ public class Odometry2 {
             setVelocity(0, 0);
 
         }
-        // use 0 - -360
-        /*else if(angle <= -180){
-            turnPid.start();
 
-            angleError = getError(angle, normRight(getCurrentAngle()));
-
-            while(Math.abs(angleError) < turnThreshhold && Globals.opMode.opModeIsActive()){
-                setVelocity(0, turnPid.getOutput(angleError));
-
-                angleError = getError(angle, normRight(getCurrentAngle()));
-            }
-
-        }*/
         // use 180 - -180
         else{
             turnPid.start();
@@ -219,7 +206,7 @@ public class Odometry2 {
         // get the target distance as the current "y" value plus the hypotenuse of the desired change in coordinates
         double targetDist = currentY + Math.hypot(Math.abs(deltaX), Math.abs(deltaY));
 
-        // TODO: eventually add maintaining of angle (see pushbotuatodrivebygyro)
+        // TODO: eventually add maintaining of angle (see PushbotAutoDriveByGyro)
 
         posPid.start();
 //        turnPid.start();
@@ -254,25 +241,8 @@ public class Odometry2 {
 
     /**
      * 1 = red, 0 = blue
-     * @param pipeline
-     * @param side
      */
     public void alignWithSkystone(BlackPipeline pipeline, int side) {
-        // y range 280-380
-
-        /*double coeff = 0.2;
-
-        int target = 330;
-        int current = pipeline.chosenRect.y;
-
-        while (Math.abs(current - target) > 50 && Globals.opMode.opModeIsActive()) {
-            setVelocity(0, (current - target) * coeff);
-
-            Globals.opMode.telemetry.addData("Current y: ", current);
-            Globals.opMode.telemetry.addData("Current error: ", current - target);
-
-            current = pipeline.chosenRect.y;
-        }*/
         int current = pipeline.chosenRect.y;
 
         // red
@@ -286,7 +256,7 @@ public class Odometry2 {
                 turnTo(-6);
             }
             // middle
-            else if (current <= 250 && current > 100) {
+            else if (current > 100) {
                 drive(Direction.FORWARD, 4, 0.5);
                 turnTo(5);
             }
@@ -308,7 +278,7 @@ public class Odometry2 {
                 turnTo(-5);
             }
             // middle
-            else if (current <= 350 && current > 150) {
+            else if (current > 150) {
                 drive(Direction.FORWARD, 4, 0.5);
                 turnTo(5);
             }

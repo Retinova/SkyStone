@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 
+@Deprecated
 @Disabled
 @TeleOp(name="mouse test", group="mouse")
 public class MouseTest1 extends LinearOpMode {
