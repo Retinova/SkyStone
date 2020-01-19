@@ -48,7 +48,6 @@ public class Odometry {
                 normalizedAngle = normLeft(getRawAngle());
 
                 pid.start();
-                // TODO: opModeIsActive
                 while(true){
 
                     pid.getOutput(normalizedAngle);
@@ -110,12 +109,10 @@ public class Odometry {
 //            target = normalize(target);
 //            normalizedAngle = normalize(rawAngle);
 //            // use pid on normalized angle
-//            // TODO: pid
 //        }
     }
 
     public void turnRightTo(double target){
-        // TODO: apply modifications of left turn here
         // handle wraparounds
         if(target < -360){
 
@@ -123,18 +120,14 @@ public class Odometry {
             if(rawAngle <= 0){
                 // use 0 - -360 until -190, then switch to -180 - 180(normalized angle then switch to non-normalized)
                 normalizedAngle = normRight(target);
-                // TODO: opModeIsActive
                 while(normalizedAngle > -190){
-                    // TODO: pid
 
                 }
                 // use raw angle
-                // TODO: pid
 
             }
             else{
                 // rawAngle > 0, use -180 - 180 straight away(use non-normalized angle)
-                // TODO: pid
             }
         }
 
@@ -143,7 +136,6 @@ public class Odometry {
             // normalize for 0 - -360
             normalizedAngle = normRight(rawAngle);
             // use pid on normalized angle
-            // TODO: pid
         }
 
         // target is positive, but still turning right
@@ -151,7 +143,6 @@ public class Odometry {
             target = normRight(target);
             normalizedAngle = normRight(rawAngle);
             // use pid on normalized angle
-            // TODO: pid
         }
     }
 
@@ -166,7 +157,6 @@ public class Odometry {
     }
 
     public double getRawAngle() {
-        // TODO: get actual reading
         return rawAngle;
     }
 

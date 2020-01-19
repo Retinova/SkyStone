@@ -45,8 +45,7 @@ public class MouseThread extends Thread {
         connection.close();
     }
 
-    public int[] getCoords(){
-        synchronized (allData) {
+    public synchronized int[] getCoords(){
             if (!allData.isEmpty()) {
                 for (byte[] dataArr : allData) {
                     coords[0] += (int) dataArr[1];
@@ -54,7 +53,6 @@ public class MouseThread extends Thread {
                 }
                 allData.clear();
             }
-        }
         return coords;
     }
 }

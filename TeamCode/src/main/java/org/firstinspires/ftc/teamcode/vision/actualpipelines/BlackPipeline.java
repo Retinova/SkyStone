@@ -50,16 +50,15 @@ public class BlackPipeline extends OpenCvPipeline {
             }
 
             for(MatOfPoint contour : bestContours){
+
                 Rect temp = Imgproc.boundingRect(contour);
                 currentCenter.set(getCenter(temp));
 
                 if(currentCenter.x < lowestX) {
                     lowestX = (int) currentCenter.x;
-//                    highestY = (int) currentCenter.y;
                     chosenRect = temp;
                     chosenCenter.set(getCenter(temp));
                 }
-//                Imgproc.rectangle(output, new Point(temp.x, temp.y), new Point(temp.x + temp.width, temp.y + temp.height), new Scalar(255, 0, 200), 20);
             }
 
             if(chosenRect != null){
@@ -83,7 +82,6 @@ public class BlackPipeline extends OpenCvPipeline {
             default:
                 return input;
         }
-
     }
 
     @Override

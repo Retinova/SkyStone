@@ -1,15 +1,23 @@
 package org.firstinspires.ftc.teamcode.odometryinput;
 
+import android.content.Context;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.supers.Direction;
 import org.firstinspires.ftc.teamcode.supers.Globals;
 import org.firstinspires.ftc.teamcode.supers.Quadrant;
 import org.firstinspires.ftc.teamcode.vision.actualpipelines.BlackPipeline;
+
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class Odometry2 {
 
@@ -18,6 +26,7 @@ public class Odometry2 {
 
     private final int dpi = 1000;
     private final int fieldLength = 144000;
+    private int[] coords = {0, 0};
 
     public final BNO055IMU imu;
     public BNO055IMU.Parameters params = new BNO055IMU.Parameters();
@@ -27,13 +36,19 @@ public class Odometry2 {
     private double turnThreshhold = 1.0;
     private PIDController turnPid = new PIDController(0.015, 0.0, 0.0);
 
-//    private double currentX = 0;
+    private double currentX = 0;
     private double currentY = 0;
     private double coordError;
     // TODO: set threshhold + tuning
-    private double coordThreshold;
+    private double coordThreshold = 0b110010000; // 0.4 in
     private Quadrant angleQuad;
     private PIDController posPid = new PIDController(0, 0, 0);
+
+    private UsbManager usbManager;
+    private UsbDevice device;
+    private HashMap<String, UsbDevice> deviceList = new HashMap<>();
+    private MouseThread mouseThread;
+    private boolean mouseInitialized = false;
 
     private boolean isInitialized = false;
 
@@ -72,6 +87,23 @@ public class Odometry2 {
         lb.setDirection(DcMotorSimple.Direction.REVERSE);
 //        rsweeper.setDirection(DcMotorSimple.Direction.REVERSE);
         lservo.setDirection(Servo.Direction.REVERSE);
+
+        // mouse
+        try {
+            usbManager = (UsbManager) AppUtil.getDefContext().getSystemService(Context.USB_SERVICE);
+            deviceList = usbManager.getDeviceList();
+            Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
+            while(deviceIterator.hasNext()){
+                device = deviceIterator.next();
+                if(device.getProductId() == 0x4d0f) break;
+            }
+
+            mouseThread = new MouseThread(usbManager, device);
+            mouseInitialized = true;
+        } catch (Exception e){
+            Globals.opMode.telemetry.addData("Failed to setup mouse: ", e);
+            Globals.opMode.telemetry.update();
+        }
     }
 
     public void initGyro(){
@@ -94,6 +126,10 @@ public class Odometry2 {
         lb.setPower(left / max);
         rf.setPower(right / max);
         rb.setPower(right / max);
+    }
+
+    public void initMouse(){
+        if(mouseInitialized) mouseThread.start();
     }
 
     public void turnTo(double angle){
@@ -158,34 +194,17 @@ public class Odometry2 {
         return actual - target;
     }
 
-    public void update(){
-        // get a working average of the current encoder count
-        double sum = lf.getCurrentPosition() + lb.getCurrentPosition() + rf.getCurrentPosition() + rb.getCurrentPosition();
-        double avgDeltaPos = sum / 4.0;
-//        this is commented out temporarily, until actual odometry is ready (currently utilizes only forward/backward tracking)
-//        double currentAng = getCurrentAngle();
-//        double deltaX = avgDeltaPos * Math.cos(Math.toRadians(currentAng + 90));
-//        double deltaY = avgDeltaPos * Math.sin(Math.toRadians(currentAng + 90));
+    public void update() {
+        double currentAng = getCurrentAngle();
+        int[] totals = mouseThread.getCoords();
+        double newX = totals[0] * Math.cos(Math.toRadians(currentAng + 90)) - currentX;
+        double newY = totals[1] * Math.sin(Math.toRadians(currentAng + 90)) - currentY;
 
-//        currentX += deltaX;
-        currentY += avgDeltaPos;
-
-        resetEncoders();
+        currentX = newX;
+        currentY = newY;
     }
 
     public void drive(double deltaX, double deltaY){
-        /*if(deltaX >= 0 && deltaY >= 0) angleQuad = Quadrant.I;
-        if(deltaX < 0 && deltaY >= 0) angleQuad = Quadrant.II;
-        if(deltaX < 0 && deltaY < 0) angleQuad = Quadrant.III;
-        if(deltaX >= 0 && deltaY < 0) angleQuad = Quadrant.IV;*/
-
-        double wheelDiam = 4.0;
-        double ticksPerRev = 280.0;
-        double gearReduction = (2.0/3.0);
-        double ticksPerInch = (ticksPerRev * gearReduction) / (wheelDiam * Math.PI);
-
-        deltaX *= ticksPerInch;
-        deltaY *= ticksPerInch;
 
         // get the angle to turn for aligning with the hypotenuse from inverse tan, subtract 90 to shift into proper robot orientation
         double targetAngle = Math.toDegrees(Math.atan2(deltaY, deltaX)) - 90;
@@ -200,8 +219,6 @@ public class Odometry2 {
 
         // align with hypotenuse
         turnTo(targetAngle);
-
-        resetEncoders();
 
         // get the target distance as the current "y" value plus the hypotenuse of the desired change in coordinates
         double targetDist = currentY + Math.hypot(Math.abs(deltaX), Math.abs(deltaY));
@@ -224,6 +241,8 @@ public class Odometry2 {
             coordError = getError(targetDist, currentY);
 //            angleError = getError(targetAngle, getCurrentAngle());
         }
+
+        setVelocity(0, 0);
     }
 
     public void resetEncoders(){
