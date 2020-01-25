@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @Disabled
-@TeleOp(name="demobot", group="teleop")
+@TeleOp(name="demobot", group="demobot")
 public class DriveMode extends LinearOpMode {
     DcMotor lf, lb, rf, rb = null;
 
@@ -27,7 +27,7 @@ public class DriveMode extends LinearOpMode {
 
             double r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
             double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
-            double rightX = -gamepad1.right_stick_x;
+            double rightX = gamepad1.right_stick_x;
 
             final double lfp = r * Math.sin(robotAngle) + rightX;
             final double lbp = r * Math.cos(robotAngle) + rightX;

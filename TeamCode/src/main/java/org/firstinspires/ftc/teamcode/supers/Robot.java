@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.supers;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.odometryinput.Odometry2;
@@ -14,6 +15,7 @@ public class Robot {
     public Robot(LinearOpMode opMode){
         Globals.opMode = opMode;
         Globals.hwMap = opMode.hardwareMap;
+        Globals.dash = FtcDashboard.getInstance();
 
         isInitialized = true;
     }

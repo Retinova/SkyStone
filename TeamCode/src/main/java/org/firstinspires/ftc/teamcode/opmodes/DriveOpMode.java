@@ -11,11 +11,12 @@ public class DriveOpMode extends LinearOpMode {
     Robot robot;
 
     double speedSetting = 1.0;
-    boolean lastRight = false, lastLeft = false, currentRight, currentLeft, toggle = true, lastA = false, currentA;
+    boolean lastRBumper = false, lastLBumper = false, currentRBumper, currentLBumper, toggle = true, lastA = false, currentA, lastLButton = false, lastRButton = false, currentLButton, currentRButton;
     double[] positions = new double[]{0.0, 0.1, 0.2, 0.3, 0.4, 0.5};
-    int currentIndex = 5;
-    double[] hookPos = new double[]{0.0, 1.0};
-    int hookIndex = 1;
+    int currentIndex = 0;
+    double[] hookPos = new double[]{1, 0.45};
+    int hookIndex = 0;
+    int sweepMode = 0;
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -54,25 +55,27 @@ public class DriveOpMode extends LinearOpMode {
             robot.tele.rb.setPower(-rb);
 
             // intake servos
-            currentLeft = gamepad1.left_bumper;
-            currentRight = gamepad1.right_bumper;
+            currentLBumper = gamepad1.left_bumper;
+            currentRBumper = gamepad1.right_bumper;
 
-            if(currentLeft && !lastLeft){
+            if(currentLBumper && !lastLBumper){
                 // decrement position
-                int nextPos = (currentIndex + 5) % 6;
+                int nextPos = currentIndex - 1;
+                if(nextPos == -1) nextPos = 0;
                 currentIndex = nextPos;
             }
-            if(currentRight && !lastRight){
+            if(currentRBumper && !lastRBumper){
                 // increment position
-                int nextPos = (currentIndex + 1) % 6;
+                int nextPos = currentIndex + 1;
+                if(nextPos == 6) nextPos = 5;
                 currentIndex = nextPos;
             }
 
-            robot.tele.rservo.setPosition(positions[currentIndex]);
+            robot.tele.rservo.setPosition(positions[currentIndex] + 0.05);
             robot.tele.lservo.setPosition(positions[currentIndex]);
 
-            lastLeft = currentLeft;
-            lastRight = currentRight;
+            lastLBumper = currentLBumper;
+            lastRBumper = currentRBumper;
 
             // hook
             currentA = gamepad1.a;
@@ -87,13 +90,42 @@ public class DriveOpMode extends LinearOpMode {
             lastA = currentA;
 
             // sweeper
-            robot.tele.lsweeper.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
-            robot.tele.rsweeper.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
+            currentLButton = gamepad1.left_stick_button;
+            currentRButton = gamepad1.right_stick_button;
+            
+            if(currentLButton && !lastLButton){
+                sweepMode -= 1;
+                if(sweepMode <= -2) sweepMode = -1;
+            }
+            if(currentRButton && !lastRButton){
+                sweepMode += 1;
+                if(sweepMode >= 2) sweepMode = 1;
+            }
+
+            if(sweepMode == 0) {
+                robot.tele.lsweeper.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
+                robot.tele.rsweeper.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
+            }
+            else if(sweepMode ==  1){
+                robot.tele.lsweeper.setPower(1);
+                robot.tele.rsweeper.setPower(1);
+            }
+            else{
+                robot.tele.lsweeper.setPower(-1);
+                robot.tele.rsweeper.setPower(-1);
+            }
+
+            lastLButton = currentLButton;
+            lastRButton = currentRButton;
 
             // telemetry
             telemetry.addData("Servo pos: ", positions[currentIndex]);
             telemetry.addData("Touched: ", robot.tele.intake.isPressed());
             telemetry.addData("Hook pos: ", hookPos[hookIndex]);
+            telemetry.addData("right back", robot.tele.rb.getPower());
+            telemetry.addData("right front", robot.tele.rf.getPower());
+            telemetry.addData("left back", robot.tele.lb.getPower());
+            telemetry.addData("left front", robot.tele.lf.getPower());
             telemetry.update();
         }
     }

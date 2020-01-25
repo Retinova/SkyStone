@@ -13,7 +13,7 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
 //@Disabled
-@Autonomous(name="skystone deliver park red", group="auto")
+@Autonomous(name="Skystone Deliver Park Red", group="stones")
 public class SkystoneDeliverParkRed extends LinearOpMode {
     Robot robot;
     OpenCvCamera webcam;
@@ -47,9 +47,8 @@ public class SkystoneDeliverParkRed extends LinearOpMode {
         robot.odo.alignWithSkystone(pipeline, 1);
         robot.odo.drive(Direction.FORWARD, 18, 0.5);
         robot.auto.autoIntake();
-        robot.odo.drive(Direction.BACK, 10, 0.5);
         robot.odo.turnTo(-90);
-        robot.odo.drive(Direction.FORWARD, 46, 0.5);
+        robot.odo.drive(Direction.FORWARD, 52, 0.5);
         robot.auto.output();
         robot.odo.drive(Direction.BACK, 10, 0.5);
 

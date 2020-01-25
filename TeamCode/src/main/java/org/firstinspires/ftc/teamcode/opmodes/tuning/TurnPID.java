@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.supers.Mode;
 import org.firstinspires.ftc.teamcode.supers.Robot;
 
-@Disabled
+//@Disabled
 @Autonomous(name="turn pid tuning", group="testing")
 public class TurnPID extends LinearOpMode {
     Robot robot;
@@ -26,18 +26,12 @@ public class TurnPID extends LinearOpMode {
 //        telemetry.update();
 
         robot.odo.turnTo(90);
-        telemetry.addData("Current error: ", robot.odo.angleError);
-        telemetry.update();
 
         sleep(2000);
         robot.odo.turnTo(-90);
-        telemetry.addData("Current error: ", robot.odo.angleError);
-        telemetry.update();
 
         sleep(2000);
         robot.odo.turnTo(0);
-        telemetry.addData("Current error: ", robot.odo.angleError);
-        telemetry.update();
 
         robot.odo.imu.close();
 

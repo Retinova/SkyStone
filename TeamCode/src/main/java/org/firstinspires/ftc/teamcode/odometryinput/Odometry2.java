@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.supers.Direction;
 import org.firstinspires.ftc.teamcode.supers.Globals;
@@ -52,7 +53,11 @@ public class Odometry2 {
 
     private boolean isInitialized = false;
 
+    private Telemetry dashTelem;
+
     public Odometry2(){
+        dashTelem = Globals.dash.getTelemetry();
+
         lservo = Globals.hwMap.servo.get("lservo");
         rservo = Globals.hwMap.servo.get("rservo");
         hook = Globals.hwMap.servo.get("back");
@@ -109,7 +114,7 @@ public class Odometry2 {
     public void initGyro(){
         ElapsedTime timer = new ElapsedTime();
         timer.reset();
-        while(imu.getSystemStatus() != BNO055IMU.SystemStatus.RUNNING_FUSION) {
+        while(imu.getSystemStatus() != BNO055IMU.SystemStatus.RUNNING_FUSION && !Globals.opMode.isStopRequested()) {
             imu.initialize(params);
         }
         isInitialized = true;
@@ -135,22 +140,28 @@ public class Odometry2 {
     public void turnTo(double angle){
 
         // use 0 - 360
-        if(angle >= 180 || angle <= -180){
-            if(angle <= -180) angle = normalize(angle);
+        if(angle >= 180 || angle <= -180) {
+            if (angle <= -180) angle = normalize(angle);
 
             turnPid.start();
             angleError = getError(angle, normalize(getCurrentAngle()));
 
-            while(Math.abs(angleError) > turnThreshhold && Globals.opMode.opModeIsActive()){
+            while (Math.abs(angleError) > turnThreshhold && Globals.opMode.opModeIsActive()) {
                 setVelocity(0, turnPid.getOutput(angleError));
-                Globals.opMode.telemetry.addData("Current eror: ", angleError);
-                Globals.opMode.telemetry.update();
+                dashTelem.addData("Current error: ", angleError);
+                dashTelem.addData("Current angle: ", getCurrentAngle());
+                dashTelem.addData("Target: ", angle);
+                dashTelem.update();
 
                 angleError = getError(angle, normalize(getCurrentAngle()));
             }
 
             setVelocity(0, 0);
 
+            dashTelem.addData("Current error: ", angleError);
+            dashTelem.addData("Current angle: ", getCurrentAngle());
+            dashTelem.addData("Target: ", angle);
+            dashTelem.update();
         }
 
         // use 180 - -180
@@ -158,16 +169,21 @@ public class Odometry2 {
             turnPid.start();
             angleError = getError(angle, getCurrentAngle());
 
-            while(Math.abs(angleError) > turnThreshhold && Globals.opMode.opModeIsActive()){
+            while(Math.abs(angleError) > turnThreshhold && Globals.opMode.opModeIsActive()) {
                 setVelocity(0, turnPid.getOutput(angleError));
-                Globals.opMode.telemetry.addData("Current eror: ", angleError);
-                Globals.opMode.telemetry.addData("Current angl: ", getCurrentAngle());
-                Globals.opMode.telemetry.update();
+                dashTelem.addData("Current error: ", angleError);
+                dashTelem.addData("Current angle: ", getCurrentAngle());
+                dashTelem.addData("Target: ", angle);
+                dashTelem.update();
                 angleError = getError(angle, getCurrentAngle());
             }
 
             setVelocity(0, 0);
 
+            dashTelem.addData("Current error: ", angleError);
+            dashTelem.addData("Current angle: ", getCurrentAngle());
+            dashTelem.addData("Target: ", angle);
+            dashTelem.update();
         }
     }
 
@@ -197,8 +213,8 @@ public class Odometry2 {
     public void update() {
         double currentAng = getCurrentAngle();
         int[] totals = mouseThread.getCoords();
-        double newX = totals[0] * Math.cos(Math.toRadians(currentAng + 90)) - currentX;
-        double newY = totals[1] * Math.sin(Math.toRadians(currentAng + 90)) - currentY;
+        double newX = totals[0] * Math.cos(Math.toRadians(currentAng + 90));
+        double newY = totals[1] * Math.sin(Math.toRadians(currentAng + 90));
 
         currentX = newX;
         currentY = newY;

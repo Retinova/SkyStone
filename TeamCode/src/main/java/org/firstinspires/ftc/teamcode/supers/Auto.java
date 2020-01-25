@@ -175,11 +175,15 @@ public class Auto {
     }
 
     public void autoIntake(){
+        int startPos;
+        int distanceTraveled = 0;
+
         lsweeper.setPower(1.0);
         rsweeper.setPower(1.0);
 
         ElapsedTime intakeTimer = new ElapsedTime();
 
+        startPos = (lf.getCurrentPosition() + rf.getCurrentPosition() + lb.getCurrentPosition() + rb.getCurrentPosition()) / 4;
 
         lf.setPower(0.2);
         rf.setPower(0.2);
@@ -196,6 +200,12 @@ public class Auto {
         lb.setPower(0);
         rf.setPower(0);
         rb.setPower(0);
+
+        distanceTraveled = ((lf.getCurrentPosition() + rf.getCurrentPosition() + lb.getCurrentPosition() + rb.getCurrentPosition()) / 4) - startPos;
+
+        int distanceInches = (int) (distanceTraveled * ((4.0 * Math.PI) / 537.6));
+
+        drive(Direction.BACK, distanceInches, 0.5);
 
 //        lsweeper.setPower(0);
 //        rsweeper.setPower(0);
