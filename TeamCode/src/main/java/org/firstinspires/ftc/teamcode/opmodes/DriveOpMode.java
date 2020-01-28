@@ -8,15 +8,15 @@ import org.firstinspires.ftc.teamcode.supers.Robot;
 
 @TeleOp(name="TeleOp", group="driving")
 public class DriveOpMode extends LinearOpMode {
-    Robot robot;
+    private Robot robot;
 
-    double speedSetting = 1.0;
-    boolean lastRBumper = false, lastLBumper = false, currentRBumper, currentLBumper, toggle = true, lastA = false, currentA, lastLButton = false, lastRButton = false, currentLButton, currentRButton;
-    double[] positions = new double[]{0.0, 0.1, 0.2, 0.3, 0.4, 0.5};
-    int currentIndex = 0;
-    double[] hookPos = new double[]{1, 0.45};
-    int hookIndex = 0;
-    int sweepMode = 0;
+    private double speedSetting = 1.0;
+    private boolean lastRBumper = false, lastLBumper = false, currentRBumper, currentLBumper, toggle = true, lastA = false, currentA, lastLButton = false, lastRButton = false, currentLButton, currentRButton;
+    private double[] positions = new double[]{0.0, 0.1, 0.2, 0.3, 0.4, 0.5};
+    private int currentIndex = 0;
+    private double[] hookPos = new double[]{1, 0.45};
+    private int hookIndex = 0;
+    private int sweepMode = 0;
 
     @Override
     public void runOpMode() throws InterruptedException{

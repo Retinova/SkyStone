@@ -211,13 +211,19 @@ public class Odometry2 {
     }
 
     public void update() {
-        double currentAng = getCurrentAngle();
+        double currentAng = Math.toRadians(getCurrentAngle());
+        double shifted = currentAng + (Math.PI / 2.0);
+        // 0 = mouse x, 1 = mouse y
         int[] totals = mouseThread.getCoords();
-        double newX = totals[0] * Math.cos(Math.toRadians(currentAng + 90));
-        double newY = totals[1] * Math.sin(Math.toRadians(currentAng + 90));
+        // shift the angle for the 1s, but dont for the 2s because they are for mouse x movement(perpendicular to y movement)
+        double newX1 = totals[1] * Math.cos(shifted);
+        double newY1 = totals[1] * Math.sin(shifted);
 
-        currentX = newX;
-        currentY = newY;
+        double newX2 = totals[0] * Math.cos(currentAng);
+        double newY2 = totals[0] * Math.sin(currentAng);
+
+        currentX = newX1 + newX2;
+        currentY = newY1 + newY2;
     }
 
     public void drive(double deltaX, double deltaY){
