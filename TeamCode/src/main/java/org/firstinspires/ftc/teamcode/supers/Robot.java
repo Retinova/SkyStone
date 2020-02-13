@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.supers;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.odometryinput.Odometry2;
@@ -16,6 +17,7 @@ public class Robot {
         Globals.opMode = opMode;
         Globals.hwMap = opMode.hardwareMap;
         Globals.dash = FtcDashboard.getInstance();
+        Globals.telem = new MultipleTelemetry(opMode.telemetry, Globals.dash.getTelemetry());
 
         isInitialized = true;
     }

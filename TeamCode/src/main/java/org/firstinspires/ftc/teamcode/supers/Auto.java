@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.vision.actualpipelines.BlackPipeline;
 import org.openftc.easyopencv.OpenCvPipeline;
 
@@ -21,8 +22,12 @@ public class Auto {
 
     private boolean isInitialized = false;
 
+    private Telemetry telem;
+
 
     public Auto(){
+        telem = Globals.telem;
+
         lservo = Globals.hwMap.servo.get("lservo");
         rservo = Globals.hwMap.servo.get("rservo");
         hook = Globals.hwMap.servo.get("back");
@@ -146,13 +151,13 @@ public class Auto {
                     (lf.isBusy() && lb.isBusy() && rf.isBusy() && rb.isBusy())) {
 
                 // Display current status of motor paths
-                Globals.opMode.telemetry.addData("Path1", "Running to %7d :%7d :%7d :%7d", newLeftFrontTarget, newLeftBackTarget, newRightFrontTarget, newRightBackTarget);
-                Globals.opMode.telemetry.addData("Path2", "Running at %7d :%7d :%7d :%7d", lf.getCurrentPosition(), lb.getCurrentPosition(), rf.getCurrentPosition(), rb.getCurrentPosition());
-                Globals.opMode.telemetry.addData("right back", rb.getPower());
-                Globals.opMode.telemetry.addData("right front", rf.getPower());
-                Globals.opMode.telemetry.addData("left back", lb.getPower());
-                Globals.opMode.telemetry.addData("left front", lf.getPower());
-                Globals.opMode.telemetry.update();
+                telem.addData("Path1", "Running to %7d :%7d :%7d :%7d", newLeftFrontTarget, newLeftBackTarget, newRightFrontTarget, newRightBackTarget);
+                telem.addData("Path2", "Running at %7d :%7d :%7d :%7d", lf.getCurrentPosition(), lb.getCurrentPosition(), rf.getCurrentPosition(), rb.getCurrentPosition());
+                telem.addData("right back", rb.getPower());
+                telem.addData("right front", rf.getPower());
+                telem.addData("left back", lb.getPower());
+                telem.addData("left front", lf.getPower());
+                telem.update();
             }
 
             // Stop all motion

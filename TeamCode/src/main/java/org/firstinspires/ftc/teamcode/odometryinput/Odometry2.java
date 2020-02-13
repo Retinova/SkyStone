@@ -53,10 +53,10 @@ public class Odometry2 {
 
     private boolean isInitialized = false;
 
-    private Telemetry dashTelem;
-
+    private Telemetry telem;
+    
     public Odometry2(){
-        dashTelem = Globals.dash.getTelemetry();
+        telem = Globals.telem;
 
         lservo = Globals.hwMap.servo.get("lservo");
         rservo = Globals.hwMap.servo.get("rservo");
@@ -106,8 +106,8 @@ public class Odometry2 {
             mouseThread = new MouseThread(usbManager, device);
             mouseInitialized = true;
         } catch (Exception e){
-            Globals.opMode.telemetry.addData("Failed to setup mouse: ", e);
-            Globals.opMode.telemetry.update();
+            telem.addData("Failed to setup mouse: ", e);
+            telem.update();
         }
     }
 
@@ -116,9 +116,11 @@ public class Odometry2 {
         timer.reset();
         while(imu.getSystemStatus() != BNO055IMU.SystemStatus.RUNNING_FUSION && !Globals.opMode.isStopRequested()) {
             imu.initialize(params);
+            telem.addData("Status: ", imu.getSystemStatus());
+            telem.update();
         }
         isInitialized = true;
-        Globals.opMode.telemetry.addData("status; ", imu.getSystemStatus());
+        telem.addData("status; ", imu.getSystemStatus());
     }
 
     public void setVelocity(double forward, double clockwise){
@@ -148,20 +150,20 @@ public class Odometry2 {
 
             while (Math.abs(angleError) > turnThreshhold && Globals.opMode.opModeIsActive()) {
                 setVelocity(0, turnPid.getOutput(angleError));
-                dashTelem.addData("Current error: ", angleError);
-                dashTelem.addData("Current angle: ", getCurrentAngle());
-                dashTelem.addData("Target: ", angle);
-                dashTelem.update();
+                telem.addData("Current error: ", angleError);
+                telem.addData("Current angle: ", getCurrentAngle());
+                telem.addData("Target: ", angle);
+                telem.update();
 
                 angleError = getError(angle, normalize(getCurrentAngle()));
             }
 
             setVelocity(0, 0);
 
-            dashTelem.addData("Current error: ", angleError);
-            dashTelem.addData("Current angle: ", getCurrentAngle());
-            dashTelem.addData("Target: ", angle);
-            dashTelem.update();
+            telem.addData("Current error: ", angleError);
+            telem.addData("Current angle: ", getCurrentAngle());
+            telem.addData("Target: ", angle);
+            telem.update();
         }
 
         // use 180 - -180
@@ -171,19 +173,19 @@ public class Odometry2 {
 
             while(Math.abs(angleError) > turnThreshhold && Globals.opMode.opModeIsActive()) {
                 setVelocity(0, turnPid.getOutput(angleError));
-                dashTelem.addData("Current error: ", angleError);
-                dashTelem.addData("Current angle: ", getCurrentAngle());
-                dashTelem.addData("Target: ", angle);
-                dashTelem.update();
+                telem.addData("Current error: ", angleError);
+                telem.addData("Current angle: ", getCurrentAngle());
+                telem.addData("Target: ", angle);
+                telem.update();
                 angleError = getError(angle, getCurrentAngle());
             }
 
             setVelocity(0, 0);
 
-            dashTelem.addData("Current error: ", angleError);
-            dashTelem.addData("Current angle: ", getCurrentAngle());
-            dashTelem.addData("Target: ", angle);
-            dashTelem.update();
+            telem.addData("Current error: ", angleError);
+            telem.addData("Current angle: ", getCurrentAngle());
+            telem.addData("Target: ", angle);
+            telem.update();
         }
     }
 
@@ -215,7 +217,7 @@ public class Odometry2 {
         double shifted = currentAng + (Math.PI / 2.0);
         // 0 = mouse x, 1 = mouse y
         int[] totals = mouseThread.getCoords();
-        // shift the angle for the 1s, but dont for the 2s because they are for mouse x movement(perpendicular to y movement)
+        // shift the angle for the y-input, but dont for the x-input because perpendicular to y movement
         double newX1 = totals[1] * Math.cos(shifted);
         double newY1 = totals[1] * Math.sin(shifted);
 
@@ -242,30 +244,55 @@ public class Odometry2 {
         // align with hypotenuse
         turnTo(targetAngle);
 
+
         // get the target distance as the current "y" value plus the hypotenuse of the desired change in coordinates
-        double targetDist = currentY + Math.hypot(Math.abs(deltaX), Math.abs(deltaY));
+        double targetDist = currentY + Math.hypot(Math.abs(deltaX), Math.abs(deltaY)); // irrelevant now?
+
+        double targetX = currentX + deltaX;
+        double targetY = currentY + deltaY;
+
+        double lf;
+        double lb;
+        double rf;
+        double rb;
+        double coordOut;
+        double curAng;
 
         // TODO: eventually add maintaining of angle (see PushbotAutoDriveByGyro)
 
         posPid.start();
-//        turnPid.start();
 
-//        angleError = getError(targetAngle, getCurrentAngle());
-        coordError = getError(targetDist, currentY);
+        coordError = Math.hypot(getError(targetX, currentX), getError(targetY, currentY));
+        double angleToTarget = Math.atan2(getError(targetY, currentY), getError(targetX, currentX)) - Math.PI / 4 - Math.toRadians(getCurrentAngle());
 
         while(Math.abs(coordError) < coordThreshold && Globals.opMode.opModeIsActive()){
-//            setVelocity(posPid.getOutput(coordError), turnPid.getOutput(angleError));
-            setVelocity(posPid.getOutput(coordError), 0);
+//            setVelocity(posPid.getOutput(coordError), 0);
+            coordOut = posPid.getOutput(coordError);
 
-            // update "y" values
+            lf = coordOut * Math.sin(angleToTarget);
+            lb = coordOut * Math.cos(angleToTarget);
+            rf = coordOut * Math.cos(angleToTarget);
+            rb = coordOut * Math.sin(angleToTarget);
+
+            this.lf.setPower(lf);
+            this.lb.setPower(lb);
+            this.rf.setPower(rf);
+            this.rb.setPower(rb);
+
+            // update coordinates
             update();
+            curAng = Math.toRadians(getCurrentAngle());
 
-            coordError = getError(targetDist, currentY);
-//            angleError = getError(targetAngle, getCurrentAngle());
+            coordError = Math.hypot(getError(targetX, currentX), getError(targetY, currentY));
+            // subtracts the current angle for field-centric
+            angleToTarget = Math.atan2(getError(targetY, currentY), getError(targetX, currentX)) - Math.PI / 4 - curAng;
         }
 
         setVelocity(0, 0);
     }
+
+    // TODO: series of coords
+    public void drive(double[][] coords){}
 
     public void resetEncoders(){
         lf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -283,7 +310,7 @@ public class Odometry2 {
     /**
      * 1 = red, 0 = blue
      */
-    public void alignWithSkystone(BlackPipeline pipeline, int side) {
+    public void alignWithSkystone(BlackPipeline pipeline, int side){
         int current = pipeline.chosenRect.y;
 
         // red
@@ -331,7 +358,7 @@ public class Odometry2 {
         }
     }
 
-    public void drive(Direction direction, double distance, double speed) {
+    public void drive(Direction direction, double distance, double speed){
 
         int newLeftFrontTarget = 0;
         int newLeftBackTarget = 0;
@@ -404,13 +431,13 @@ public class Odometry2 {
                     (lf.isBusy() && lb.isBusy() && rf.isBusy() && rb.isBusy())) {
 
                 // Display current status of motor paths
-                Globals.opMode.telemetry.addData("Path1", "Running to %7d :%7d :%7d :%7d", newLeftFrontTarget, newLeftBackTarget, newRightFrontTarget, newRightBackTarget);
-                Globals.opMode.telemetry.addData("Path2", "Running at %7d :%7d :%7d :%7d", lf.getCurrentPosition(), lb.getCurrentPosition(), rf.getCurrentPosition(), rb.getCurrentPosition());
-                Globals.opMode.telemetry.addData("right back", rb.getPower());
-                Globals.opMode.telemetry.addData("right front", rf.getPower());
-                Globals.opMode.telemetry.addData("left back", lb.getPower());
-                Globals.opMode.telemetry.addData("left front", lf.getPower());
-                Globals.opMode.telemetry.update();
+                telem.addData("Path1", "Running to %7d :%7d :%7d :%7d", newLeftFrontTarget, newLeftBackTarget, newRightFrontTarget, newRightBackTarget);
+                telem.addData("Path2", "Running at %7d :%7d :%7d :%7d", lf.getCurrentPosition(), lb.getCurrentPosition(), rf.getCurrentPosition(), rb.getCurrentPosition());
+                telem.addData("right back", rb.getPower());
+                telem.addData("right front", rf.getPower());
+                telem.addData("left back", lb.getPower());
+                telem.addData("left front", lf.getPower());
+                telem.update();
             }
 
             // Stop all motion
