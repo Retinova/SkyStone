@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@Disabled
+//@Disabled
 @TeleOp(name="demobot", group="demobot")
 public class DriveMode extends LinearOpMode {
     DcMotor lf, lb, rf, rb = null;
@@ -38,19 +38,6 @@ public class DriveMode extends LinearOpMode {
             rb.setPower(-rbp);
             lb.setPower(-lbp);
             rf.setPower(-rfp);
-
-//            if(gamepad1.a){
-//                lf.setPower(1.0);
-//                lb.setPower(1.0);
-//                rf.setPower(1.0);
-//                rb.setPower(1.0);
-//            }
-//            else{
-//                lf.setPower(0.0);
-//                lb.setPower(0.0);
-//                rf.setPower(0.0);
-//                rb.setPower(0.0);
-//            }
 
             telemetry.addData("lf power:", lf.getPower());
             telemetry.addData("lb power:", lb.getPower());

@@ -8,6 +8,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.supers.Direction;
 import org.firstinspires.ftc.teamcode.supers.Mode;
 import org.firstinspires.ftc.teamcode.supers.Robot;
+import org.firstinspires.ftc.teamcode.supers.Sides;
 import org.firstinspires.ftc.teamcode.vision.actualpipelines.BlackPipeline;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -44,7 +45,7 @@ public class SkystoneDeliverParkRed extends LinearOpMode {
 
         sleep(1000);
 
-        robot.odo.alignWithSkystone(pipeline, 1);
+        robot.odo.alignWithSkystone(pipeline, Sides.RED);
         robot.odo.drive(Direction.FORWARD, 18, 0.5);
         robot.auto.autoIntake();
         robot.odo.turnTo(-90);

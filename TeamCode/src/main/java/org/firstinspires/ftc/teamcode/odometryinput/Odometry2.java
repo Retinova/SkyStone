@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.supers.Direction;
 import org.firstinspires.ftc.teamcode.supers.Globals;
 import org.firstinspires.ftc.teamcode.supers.Quadrant;
+import org.firstinspires.ftc.teamcode.supers.Sides;
 import org.firstinspires.ftc.teamcode.vision.actualpipelines.BlackPipeline;
 
 import java.util.HashMap;
@@ -145,10 +146,17 @@ public class Odometry2 {
         if(angle >= 180 || angle <= -180) {
             if (angle <= -180) angle = normalize(angle);
 
+            int counter = 0;
+
             turnPid.start();
             angleError = getError(angle, normalize(getCurrentAngle()));
 
-            while (Math.abs(angleError) > turnThreshhold && Globals.opMode.opModeIsActive()) {
+            while (Globals.opMode.opModeIsActive()) {
+                if(Math.abs(angleError) > turnThreshhold) counter++;
+                else counter = 0;
+
+                if(counter >= 2) break;
+
                 setVelocity(0, turnPid.getOutput(angleError));
                 telem.addData("Current error: ", angleError);
                 telem.addData("Current angle: ", getCurrentAngle());
@@ -168,10 +176,17 @@ public class Odometry2 {
 
         // use 180 - -180
         else{
+            int counter = 0;
+
             turnPid.start();
             angleError = getError(angle, getCurrentAngle());
 
-            while(Math.abs(angleError) > turnThreshhold && Globals.opMode.opModeIsActive()) {
+            while(Globals.opMode.opModeIsActive()) {
+                if(Math.abs(angleError) > turnThreshhold) counter++;
+                else counter = 0;
+
+                if(counter >= 2) break;
+
                 setVelocity(0, turnPid.getOutput(angleError));
                 telem.addData("Current error: ", angleError);
                 telem.addData("Current angle: ", getCurrentAngle());
@@ -246,7 +261,7 @@ public class Odometry2 {
 
 
         // get the target distance as the current "y" value plus the hypotenuse of the desired change in coordinates
-        double targetDist = currentY + Math.hypot(Math.abs(deltaX), Math.abs(deltaY)); // irrelevant now?
+//        double targetDist = currentY + Math.hypot(Math.abs(deltaX), Math.abs(deltaY)); // irrelevant now?
 
         double targetX = currentX + deltaX;
         double targetY = currentY + deltaY;
@@ -258,6 +273,8 @@ public class Odometry2 {
         double coordOut;
         double curAng;
 
+        int counter = 0;
+
         // TODO: eventually add maintaining of angle (see PushbotAutoDriveByGyro)
 
         posPid.start();
@@ -265,8 +282,13 @@ public class Odometry2 {
         coordError = Math.hypot(getError(targetX, currentX), getError(targetY, currentY));
         double angleToTarget = Math.atan2(getError(targetY, currentY), getError(targetX, currentX)) - Math.PI / 4 - Math.toRadians(getCurrentAngle());
 
-        while(Math.abs(coordError) < coordThreshold && Globals.opMode.opModeIsActive()){
+        while(Globals.opMode.opModeIsActive()){
 //            setVelocity(posPid.getOutput(coordError), 0);
+            if(Math.abs(coordError) < coordThreshold) counter++;
+            else counter = 0;
+
+            if(counter >= 2) break;
+
             coordOut = posPid.getOutput(coordError);
 
             lf = coordOut * Math.sin(angleToTarget);
@@ -287,7 +309,6 @@ public class Odometry2 {
             // subtracts the current angle for field-centric
             angleToTarget = Math.atan2(getError(targetY, currentY), getError(targetX, currentX)) - Math.PI / 4 - curAng;
         }
-
         setVelocity(0, 0);
     }
 
@@ -310,14 +331,14 @@ public class Odometry2 {
     /**
      * 1 = red, 0 = blue
      */
-    public void alignWithSkystone(BlackPipeline pipeline, int side){
+    public void alignWithSkystone(BlackPipeline pipeline, Sides side){
         int current = pipeline.chosenRect.y;
 
         // red
         // right y  ~374
         // middle y ~179
         // left y ~0
-        if(side == 1) {
+        if(side == Sides.RED) {
             // right
             if (current > 250) {
                 drive(Direction.FORWARD, 4, 0.5);
