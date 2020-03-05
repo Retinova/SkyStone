@@ -14,7 +14,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.supers.Direction;
 import org.firstinspires.ftc.teamcode.supers.Globals;
-import org.firstinspires.ftc.teamcode.supers.Quadrant;
 import org.firstinspires.ftc.teamcode.supers.Sides;
 import org.firstinspires.ftc.teamcode.vision.actualpipelines.BlackPipeline;
 
@@ -22,38 +21,40 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class Odometry2 {
-
+    // hardware
     private final DcMotor lf, lb, rf, rb, lsweeper, rsweeper;
     private final Servo lservo, rservo, hook;
-
-    private final int dpi = 1000;
-    private final int fieldLength = 144000;
-    private int[] coords = {0, 0};
-
     public final BNO055IMU imu;
     public BNO055IMU.Parameters params = new BNO055IMU.Parameters();
+    private boolean isGyroInitialized = false;
 
+    // backend mouse stuff + constants
+    private final int dpi = 1000;
+    private final int fieldLength = 144000;
+    private int[] lastTotals = {0, 0}; // used to find deltas at every call of update()
+
+    // turning vars
     public double angleError;
     // TODO: set threshhold + tuning
     private double turnThreshhold = 1.0;
     private PIDController turnPid = new PIDController(0.015, 0.0, 0.0);
 
+    // odo vars
     private double currentX = 0;
     private double currentY = 0;
     private double coordError;
     // TODO: set threshhold + tuning
     private double coordThreshold = 0b110010000; // 0.4 in
-    private Quadrant angleQuad;
     private PIDController posPid = new PIDController(0, 0, 0);
 
+    // mouse hardware
     private UsbManager usbManager;
     private UsbDevice device;
     private HashMap<String, UsbDevice> deviceList = new HashMap<>();
     private MouseThread mouseThread;
-    private boolean mouseInitialized = false;
+    private boolean isMouseInitialized = false;
 
-    private boolean isInitialized = false;
-
+    // telemetry
     private Telemetry telem;
     
     public Odometry2(){
@@ -105,7 +106,7 @@ public class Odometry2 {
             }
 
             mouseThread = new MouseThread(usbManager, device);
-            mouseInitialized = true;
+            isMouseInitialized = true;
         } catch (Exception e){
             telem.addData("Failed to setup mouse: ", e);
             telem.update();
@@ -120,7 +121,7 @@ public class Odometry2 {
             telem.addData("Status: ", imu.getSystemStatus());
             telem.update();
         }
-        isInitialized = true;
+        isGyroInitialized = true;
         telem.addData("status; ", imu.getSystemStatus());
     }
 
@@ -137,7 +138,7 @@ public class Odometry2 {
     }
 
     public void initMouse(){
-        if(mouseInitialized) mouseThread.start();
+        if(isMouseInitialized) mouseThread.start();
     }
 
     public void turnTo(double angle){
@@ -205,7 +206,7 @@ public class Odometry2 {
     }
 
     public double getCurrentAngle(){
-        if(isInitialized) {
+        if(isGyroInitialized) {
             return imu.getAngularOrientation().firstAngle;
         }
         else throw new IllegalStateException("Robot/gyro not properly initialized");
@@ -232,15 +233,17 @@ public class Odometry2 {
         double shifted = currentAng + (Math.PI / 2.0);
         // 0 = mouse x, 1 = mouse y
         int[] totals = mouseThread.getCoords();
-        // shift the angle for the y-input, but dont for the x-input because perpendicular to y movement
-        double newX1 = totals[1] * Math.cos(shifted);
-        double newY1 = totals[1] * Math.sin(shifted);
+        // shift the angle for the y-input, but dont for the x-input because perpendicular to y movement(already shifted)
+        double deltaX1 = (totals[1] - lastTotals[1]) * Math.cos(shifted);
+        double deltaY1 = (totals[1] - lastTotals[1]) * Math.sin(shifted);
 
-        double newX2 = totals[0] * Math.cos(currentAng);
-        double newY2 = totals[0] * Math.sin(currentAng);
+        double deltaX2 = (totals[0] - lastTotals[0]) * Math.cos(currentAng);
+        double deltaY2 = (totals[0] - lastTotals[0]) * Math.sin(currentAng);
 
-        currentX = newX1 + newX2;
-        currentY = newY1 + newY2;
+        currentX += deltaX1 + deltaX2;
+        currentY += deltaY1 + deltaY2;
+        
+        lastTotals = totals;
     }
 
     public void drive(double deltaX, double deltaY){
