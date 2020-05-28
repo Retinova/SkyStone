@@ -35,7 +35,7 @@ public class Odometry2 {
 
     // turning vars
     public double angleError;
-    // TODO: set threshhold + tuning
+    // TODO: set threshold + tuning
     private double turnThreshhold = 1.0;
     private PIDController turnPid = new PIDController(0.015, 0.0, 0.0);
 
@@ -43,7 +43,7 @@ public class Odometry2 {
     private double currentX = 0;
     private double currentY = 0;
     private double coordError;
-    // TODO: set threshhold + tuning
+    // TODO: set threshold + tuning
     private double coordThreshold = 0b110010000; // 0.4 in
     private PIDController posPid = new PIDController(0, 0, 0);
 
@@ -56,7 +56,7 @@ public class Odometry2 {
 
     // telemetry
     private Telemetry telem;
-    
+
     public Odometry2(){
         telem = Globals.telem;
 
@@ -145,29 +145,30 @@ public class Odometry2 {
 
         // use 0 - 360
         if(angle >= 180 || angle <= -180) {
-            if (angle <= -180) angle = normalize(angle);
+            angle = normalize(angle); // normalize the angle if its negative
 
-            int counter = 0;
+            int counter = 0; // counter to keep track of consecutive times robot was within threshold
 
             turnPid.start();
             angleError = getError(angle, normalize(getCurrentAngle()));
 
             while (Globals.opMode.opModeIsActive()) {
-                if(Math.abs(angleError) > turnThreshhold) counter++;
-                else counter = 0;
+                if(Math.abs(angleError) > turnThreshhold) counter++; // threshold check
+                else counter = 0; // reset threshold counter (i.e. overshoot)
 
                 if(counter >= 2) break;
 
-                setVelocity(0, turnPid.getOutput(angleError));
+                setVelocity(0, turnPid.getOutput(angleError)); // set motor velocities with controller output
+
                 telem.addData("Current error: ", angleError);
                 telem.addData("Current angle: ", getCurrentAngle());
                 telem.addData("Target: ", angle);
                 telem.update();
 
-                angleError = getError(angle, normalize(getCurrentAngle()));
+                angleError = getError(angle, normalize(getCurrentAngle())); // update error using normalized angle
             }
 
-            setVelocity(0, 0);
+            setVelocity(0, 0); // stop motion
 
             telem.addData("Current error: ", angleError);
             telem.addData("Current angle: ", getCurrentAngle());
@@ -176,6 +177,7 @@ public class Odometry2 {
         }
 
         // use 180 - -180
+        // all components are the same as above case but adjusted for not using 0 - 360
         else{
             int counter = 0;
 
@@ -229,20 +231,25 @@ public class Odometry2 {
     }
 
     public void update() {
-        double currentAng = Math.toRadians(getCurrentAngle());
-        double shifted = currentAng + (Math.PI / 2.0);
-        // 0 = mouse x, 1 = mouse y
-        int[] totals = mouseThread.getCoords();
+        double currentAng = Math.toRadians(getCurrentAngle()); // get angle in radians
+        double shifted = currentAng + (Math.PI / 2.0); // get angle shifted 90 degrees for y inputs
+
+        int[] totals = mouseThread.getCoords(); // 0 = mouse x, 1 = mouse y
+
         // shift the angle for the y-input, but dont for the x-input because perpendicular to y movement(already shifted)
+        // y
         double deltaX1 = (totals[1] - lastTotals[1]) * Math.cos(shifted);
         double deltaY1 = (totals[1] - lastTotals[1]) * Math.sin(shifted);
 
+        // x
         double deltaX2 = (totals[0] - lastTotals[0]) * Math.cos(currentAng);
         double deltaY2 = (totals[0] - lastTotals[0]) * Math.sin(currentAng);
 
+        // add the calculated deltas
         currentX += deltaX1 + deltaX2;
         currentY += deltaY1 + deltaY2;
-        
+
+        // record last update
         lastTotals = totals;
     }
 
@@ -330,10 +337,6 @@ public class Odometry2 {
         rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-
-    /**
-     * 1 = red, 0 = blue
-     */
     public void alignWithSkystone(BlackPipeline pipeline, Sides side){
         int current = pipeline.chosenRect.y;
 
